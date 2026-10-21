@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prospecção</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #edf0f2;
+  --ink: #18212b;
+  --muted: #5b6672;
+  --rule: #c5cdd4;
+  --accent: #2438c8;
+  --accent-ink: #ffffff;
+  --danger: #b3261e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12171d;
+    --ink: #e8ecf0;
+    --muted: #9aa6b2;
+    --rule: #2a333d;
+    --accent: #8b99ff;
+    --accent-ink: #12171d;
+    --danger: #ff8a80;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.25rem 4rem;
+}
+
+header {
+  padding-top: 1.75rem;
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.55rem 0.7rem;
+}
+
+select option {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+button.primary {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: 4px;
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+}
+
+button.primary:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+#message {
+  min-height: 1.5rem;
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+}
+
+#message.error {
+  color: var(--danger);
+}
+
+#filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+#filters select {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.95rem;
+}
+
+#stages {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  border-bottom: 1px solid var(--rule);
+  overflow-x: auto;
+}
+
+#stages button {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: -1px;
+  padding: 0.75rem 0 0.5rem;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#stages button[aria-pressed="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.count {
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.lead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 2rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.lead h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.lead p {
+  margin: 0.15rem 0 0;
+}
+
+.where {
+  color: var(--muted);
+}
+
+.phone a {
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.phone.missing {
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.6rem;
+}
+
+.actions a {
+  padding: 0.3rem 0.75rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+.actions a:hover {
+  border-color: var(--accent);
+}
+
+.lead textarea {
+  display: block;
+  width: 100%;
+  min-height: 2.6rem;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+.side {
+  display: grid;
+  align-content: start;
+  justify-items: end;
+  gap: 0.75rem;
+}
+
+.pips {
+  display: flex;
+  gap: 3px;
+  padding-top: 0.45rem;
+}
+
+.pip {
+  width: 8px;
+  height: 8px;
+  background: var(--rule);
+}
+
+.pip.on {
+  background: var(--accent);
+}
+
+.empty {
+  max-width: 40ch;
+  padding: 3rem 0;
+  color: var(--muted);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 40rem) {
+  .lead {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .side {
+    grid-auto-flow: column;
+    justify-content: space-between;
+    justify-items: start;
+    align-items: center;
+  }
+
+  .pips {
+    padding-top: 0;
+  }
+
+  #stages {
+    gap: 1.25rem;
+  }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Prospecção</h1>
+    <form id="search-form">
+      <label>Segmento
+        <select id="segment"></select>
+      </label>
+      <label>Bairro
+        <input id="neighborhood" required minlength="2" placeholder="Pinheiros" autocomplete="off">
+      </label>
+      <label>Cidade
+        <input id="city" value="São Paulo" autocomplete="off">
+      </label>
+      <button id="search-button" class="primary" type="submit">Buscar leads</button>
+    </form>
+    <p id="message" role="status"></p>
+  </header>
+  <div id="filters">
+    <label>Mostrar segmento
+      <select id="filter-segment"></select>
+    </label>
+    <label>Mostrar bairro
+      <select id="filter-neighborhood"></select>
+    </label>
+  </div>
+  <nav id="stages" aria-label="Etapas do funil"></nav>
+  <main id="list"></main>
+</div>
+<script>
+const STAGES = [
+  ["novo", "Novos"],
+  ["contatado", "Contatados"],
+  ["respondeu", "Responderam"],
+  ["fechado", "Fechados"],
+  ["descartado", "Descartados"],
+];
+const STATUS_LABELS = {
+  novo: "Novo",
+  contatado: "Contatado",
+  respondeu: "Respondeu",
+  fechado: "Fechado",
+  descartado: "Descartado",
+};
+const PIPS = 6;
+
+const state = {
+  leads: [],
+  segments: {},
+  stage: "novo",
+  filter: { segment: "", neighborhood: "" },
+};
+
+const $ = (id) => document.getElementById(id);
+const enc = encodeURIComponent;
+
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "class") el.className = value;
+    else if (key.startsWith("on")) el.addEventListener(key.slice(2), value);
+    else if (value === true) el.setAttribute(key, "");
+    else if (value !== false && value != null) el.setAttribute(key, value);
+  }
+  el.append(...children.filter((child) => child != null && child !== false));
+  return el;
+}
+
+function plural(count, one, many) {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+function showMessage(text, isError = false) {
+  $("message").textContent = text;
+  $("message").className = isError ? "error" : "";
+}
+
+async function api(path, options) {
+  const response = await fetch(path, options);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(
+      typeof body.detail === "string"
+        ? body.detail
+        : "Confira os campos e tente de novo."
+    );
+  }
+  return body;
+}
+
+function whatsappUrl(phone) {
+  const digits = phone.replace(/\D/g, "");
+  const national =
+    digits.startsWith("55") && digits.length >= 12 ? digits.slice(2) : digits;
+  if (national.length === 11 && national[2] === "9") {
+    return `https://wa.me/55${national}`;
+  }
+  return null;
+}
+
+function instagramUrl(handle) {
+  if (/^https?:\/\//i.test(handle)) return handle;
+  return `https://instagram.com/${enc(handle.replace(/^@/, ""))}`;
+}
+
+function placeQuery(lead) {
+  return [lead.name, lead.address, lead.neighborhood].filter(Boolean).join(" ");
+}
+
+function mapsUrl(lead) {
+  return `https://www.google.com/maps/search/?api=1&query=${enc(placeQuery(lead))}`;
+}
+
+function siteCheckUrl(lead) {
+  return `https://www.google.com/search?q=${enc(placeQuery(lead))}`;
+}
+
+function externalLink(href, label) {
+  return h(
+    "a",
+    { href, target: "_blank", rel: "noopener noreferrer" },
+    label
+  );
+}
+
+async function updateLead(id, patch, rerender = true) {
+  try {
+    const updated = await api(`/api/leads/${enc(id)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    state.leads = state.leads.map((lead) => (lead.id === id ? updated : lead));
+    if (rerender) render();
+  } catch (error) {
+    showMessage(error.message, true);
+  }
+}
+
+function leadRow(lead) {
+  const segmentLabel = state.segments[lead.segment] || lead.segment;
+  const whatsapp = lead.phone ? whatsappUrl(lead.phone) : null;
+  const pips = h(
+    "div",
+    {
+      class: "pips",
+      role: "img",
+      "aria-label": `Cadastro completo em ${lead.score} de ${PIPS} itens`,
+      title:
+        "Quanto mais completo o cadastro no mapa (telefone, horário, endereço, Instagram), mais fácil de abordar",
+    },
+    ...Array.from({ length: PIPS }, (_, index) =>
+      h("span", { class: index < lead.score ? "pip on" : "pip" })
+    )
+  );
+  const status = h(
+    "select",
+    {
+      "aria-label": `Etapa de ${lead.name}`,
+      onchange: (event) => updateLead(lead.id, { status: event.target.value }),
+    },
+    ...STAGES.map(([key]) =>
+      h(
+        "option",
+        { value: key, selected: key === lead.status },
+        STATUS_LABELS[key]
+      )
+    )
+  );
+
+  return h(
+    "article",
+    { class: "lead" },
+    h(
+      "div",
+      { class: "info" },
+      h("h2", {}, lead.name),
+      h("p", { class: "where" }, `${segmentLabel} em ${lead.neighborhood}`),
+      lead.address ? h("p", { class: "address" }, lead.address) : null,
+      lead.phone
+        ? h(
+            "p",
+            { class: "phone" },
+            h("a", { href: `tel:${lead.phone.replace(/[^\d+]/g, "")}` }, lead.phone)
+          )
+        : h("p", { class: "phone missing" }, "Sem telefone cadastrado"),
+      h(
+        "div",
+        { class: "actions" },
+        externalLink(mapsUrl(lead), "Checar no Maps"),
+        externalLink(siteCheckUrl(lead), "Conferir site"),
+        lead.instagram ? externalLink(instagramUrl(lead.instagram), "Instagram") : null,
+        whatsapp ? externalLink(whatsapp, "WhatsApp") : null
+      ),
+      h(
+        "textarea",
+        {
+          rows: "2",
+          placeholder: "Anotações: quem atendeu, o que ficou combinado",
+          "aria-label": `Anotações sobre ${lead.name}`,
+          onchange: (event) =>
+            updateLead(lead.id, { notes: event.target.value }, false),
+        },
+        lead.notes
+      )
+    ),
+    h("div", { class: "side" }, pips, status)
+  );
+}
+
+function filteredLeads() {
+  const { segment, neighborhood } = state.filter;
+  return state.leads.filter(
+    (lead) =>
+      (!segment || lead.segment === segment) &&
+      (!neighborhood || lead.neighborhood === neighborhood)
+  );
+}
+
+function filterSelect(id, key, allLabel, labelOf) {
+  const values = [...new Set(state.leads.map((lead) => lead[key]))].sort();
+  $(id).replaceChildren(
+    h("option", { value: "", selected: state.filter[key] === "" }, allLabel),
+    ...values.map((value) =>
+      h(
+        "option",
+        { value, selected: state.filter[key] === value },
+        labelOf(value)
+      )
+    )
+  );
+}
+
+function renderFilters() {
+  filterSelect(
+    "filter-segment",
+    "segment",
+    "Todos os segmentos",
+    (key) => state.segments[key] || key
+  );
+  filterSelect(
+    "filter-neighborhood",
+    "neighborhood",
+    "Todos os bairros",
+    (value) => value
+  );
+}
+
+function renderStages() {
+  const counts = Object.fromEntries(STAGES.map(([key]) => [key, 0]));
+  filteredLeads().forEach((lead) => {
+    counts[lead.status] += 1;
+  });
+  $("stages").replaceChildren(
+    ...STAGES.map(([key, label]) =>
+      h(
+        "button",
+        {
+          type: "button",
+          "aria-pressed": String(state.stage === key),
+          onclick: () => {
+            state.stage = key;
+            render();
+          },
+        },
+        h("span", { class: "count" }, String(counts[key])),
+        h("span", {}, label)
+      )
+    )
+  );
+}
+
+function renderList() {
+  const visible = filteredLeads().filter((lead) => lead.status === state.stage);
+  if (visible.length === 0) {
+    const text =
+      state.leads.length === 0
+        ? "Nenhum lead ainda. Escolha um segmento e um bairro e clique em Buscar leads."
+        : "Nenhum lead nesta etapa.";
+    $("list").replaceChildren(h("p", { class: "empty" }, text));
+    return;
+  }
+  $("list").replaceChildren(...visible.map(leadRow));
+}
+
+function render() {
+  renderFilters();
+  renderStages();
+  renderList();
+}
+
+$("filter-segment").addEventListener("change", (event) => {
+  state.filter.segment = event.target.value;
+  render();
+});
+
+$("filter-neighborhood").addEventListener("change", (event) => {
+  state.filter.neighborhood = event.target.value;
+  render();
+});
+
+$("search-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = $("search-button");
+  button.disabled = true;
+  showMessage("Buscando no mapa. Isso pode levar até um minuto.");
+  try {
+    const result = await api("/api/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        segment: $("segment").value,
+        neighborhood: $("neighborhood").value,
+        city: $("city").value,
+      }),
+    });
+    state.leads = await api("/api/leads");
+    state.stage = "novo";
+    state.filter = {
+      segment: $("segment").value,
+      neighborhood: $("neighborhood").value.trim(),
+    };
+    render();
+    showMessage(
+      `${plural(result.total, "lugar", "lugares")} no mapa, ${result.found} sem site cadastrado, ${plural(result.added, "novo", "novos")} na sua lista.`
+    );
+  } catch (error) {
+    showMessage(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+async function init() {
+  try {
+    const segments = await api("/api/segments");
+    segments.forEach(({ key, label }) => {
+      state.segments[key] = label;
+      $("segment").append(h("option", { value: key }, label));
+    });
+    state.leads = await api("/api/leads");
+    render();
+  } catch (error) {
+    showMessage(error.message, true);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
