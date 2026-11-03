@@ -1,9 +1,15 @@
+import asyncio
+
 import httpx
+
+import contacts
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "leadfinder-personal/0.1"
 MIN_HALF_SPAN = 0.008
+RETRY_STATUSES = (429, 502, 503, 504)
+RETRY_WAITS = (5, 15, 30)
 
 SEGMENTS = {
     "restaurante": ("Restaurante", [("amenity", "restaurant")]),
@@ -26,6 +32,9 @@ PHONE_TAGS = (
     "whatsapp",
 )
 INSTAGRAM_TAGS = ("contact:instagram", "instagram")
+FACEBOOK_TAGS = ("contact:facebook", "facebook")
+OTHER_LINK_TAGS = ("contact:tiktok", "contact:youtube", "contact:linkedin", "contact:twitter")
+EMAIL_TAGS = ("email", "contact:email")
 
 
 class PlaceNotFound(Exception):
@@ -50,6 +59,11 @@ def bbox_from_nominatim(results):
         raise PlaceNotFound()
     south, north, west, east = (float(value) for value in results[0]["boundingbox"])
     return normalize_bbox(south, west, north, east)
+
+
+def uf_from_nominatim(results):
+    address = results[0].get("address", {}) if results else {}
+    return contacts.normalize_uf(address.get("ISO3166-2-lvl4"))
 
 
 def build_query(segment, bbox):
@@ -79,6 +93,29 @@ def build_address(tags):
     return ", ".join(part for part in parts if part) or None
 
 
+def presence(tags):
+    found = {
+        "instagram": first_value(tags, INSTAGRAM_TAGS),
+        "facebook": first_value(tags, FACEBOOK_TAGS),
+        "other_links": [
+            first_value(tags, (key,)) for key in OTHER_LINK_TAGS if tags.get(key)
+        ],
+        "website": None,
+        "site_state": "sem_site_na_fonte",
+    }
+    url = contacts.normalize_url(first_value(tags, WEBSITE_TAGS))
+    if url is None:
+        return found
+    kind = contacts.classify_url(url)
+    if kind == "propria":
+        return {**found, "website": url, "site_state": "site_informado"}
+    if kind in ("instagram", "facebook") and not found[kind]:
+        found[kind] = url
+    else:
+        found["other_links"].append(url)
+    return {**found, "site_state": "so_rede_social"}
+
+
 def score(phone, hours, address, instagram):
     return (
         (3 if phone else 0)
@@ -88,7 +125,7 @@ def score(phone, hours, address, instagram):
     )
 
 
-def parse_places(data, segment, neighborhood):
+def parse_places(data, segment, neighborhood, city=None, uf=None):
     named = [
         element
         for element in data.get("elements", [])
@@ -97,12 +134,11 @@ def parse_places(data, segment, neighborhood):
     leads = []
     for element in named:
         tags = element["tags"]
-        if any(tags.get(key) for key in WEBSITE_TAGS):
-            continue
         point = element if "lat" in element else element.get("center", {})
         phone = first_value(tags, PHONE_TAGS)
-        instagram = first_value(tags, INSTAGRAM_TAGS)
+        phone_national, phone_kind = contacts.normalize_phone(phone)
         address = build_address(tags)
+        links = presence(tags)
         leads.append(
             {
                 "id": f"{element['type']}-{element['id']}",
@@ -110,11 +146,18 @@ def parse_places(data, segment, neighborhood):
                 "segment": segment,
                 "neighborhood": neighborhood,
                 "phone": phone,
+                "phone_national": phone_national,
+                "phone_kind": phone_kind,
                 "address": address,
-                "instagram": instagram,
+                "city": tags.get("addr:city") or city,
+                "uf": contacts.normalize_uf(tags.get("addr:state")) or uf,
+                "email": first_value(tags, EMAIL_TAGS),
+                **links,
                 "lat": point.get("lat"),
                 "lon": point.get("lon"),
-                "score": score(phone, tags.get("opening_hours"), address, instagram),
+                "score": score(
+                    phone, tags.get("opening_hours"), address, links["instagram"]
+                ),
             }
         )
     return {"total": len(named), "leads": leads}
@@ -128,19 +171,41 @@ async def geocode(client, neighborhood, city):
             "format": "jsonv2",
             "limit": 1,
             "countrycodes": "br",
+            "addressdetails": 1,
         },
     )
     response.raise_for_status()
-    return bbox_from_nominatim(response.json())
+    results = response.json()
+    return bbox_from_nominatim(results), uf_from_nominatim(results)
 
 
-async def search(segment, neighborhood, city):
+async def query_overpass(client, query, sleep):
+    for wait in (*RETRY_WAITS, None):
+        try:
+            response = await client.post(OVERPASS_URL, data={"data": query})
+            if response.status_code not in RETRY_STATUSES:
+                response.raise_for_status()
+                return response.json()
+            failure = httpx.HTTPStatusError(
+                "O Overpass está ocupado.", request=response.request, response=response
+            )
+        except httpx.TimeoutException as error:
+            failure = error
+        if wait is None:
+            raise failure
+        await sleep(wait)
+
+
+async def search(
+    segment, neighborhood, city, transport=None, sleep=asyncio.sleep, place=None
+):
     async with httpx.AsyncClient(
-        timeout=90, headers={"User-Agent": USER_AGENT}
+        timeout=90, headers={"User-Agent": USER_AGENT}, transport=transport
     ) as client:
-        bbox = await geocode(client, neighborhood, city)
-        response = await client.post(
-            OVERPASS_URL, data={"data": build_query(segment, bbox)}
-        )
-        response.raise_for_status()
-    return parse_places(response.json(), segment, neighborhood)
+        if place:
+            bbox = normalize_bbox(place["lat"], place["lon"], place["lat"], place["lon"])
+            uf = place["uf"]
+        else:
+            bbox, uf = await geocode(client, neighborhood, city)
+        data = await query_overpass(client, build_query(segment, bbox), sleep)
+    return parse_places(data, segment, neighborhood, city, uf)

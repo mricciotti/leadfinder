@@ -51,21 +51,46 @@ Nota sobre o "tribunal": o Matheus viu uma skill com esse comportamento (consult
 | OpenStreetMap (Nominatim + Overpass) como fonte | Gratuito e sem chave. Google Places foi descartado por cobrança e cartão. |
 | **Sem scraping do Google Maps** | Viola os termos de uso do Google. |
 | **Sem usar o REA para copiar plataformas pagas** (Speedio, Econodata) | O REA é para analisar software próprio ou autorizado. Copiar APIs privadas viola termos e é desnecessário, porque os dados vêm de fontes públicas. |
+| Bairros de São Paulo numa caixa de escolha com filtro (`<datalist>`), a partir de `bairros_sp.json`: 596 nomes de `place=suburb`, `quarter` e `neighbourhood` do OpenStreetMap, baixados em 03/11/2026 com o ponto de cada um. `python places.py` baixa de novo. Outras cidades continuam com texto livre | Escolher é mais rápido que digitar e evita erro de grafia. Os nomes vêm do mapa, então existem de fato. |
+| Bairro escolhido da lista busca em volta do ponto dele (caixa de cerca de 1,8 km, `MIN_HALF_SPAN`) e não chama o Nominatim. Nome fora da lista, ou outra cidade, segue pelo Nominatim como antes | O Nominatim devolvia a estação de trem para "Pinheiros" (61 lugares). Com o ponto do bairro vieram 137. Também poupa uma chamada ao serviço. |
+| Overpass: até 4 tentativas, com espera de 5, 15 e 30 s, em 429, 502, 503, 504 e timeout. Erro de pedido (400, 404) não repete. O Nominatim é consultado uma vez só | O Overpass público falha de forma intermitente (502 em várias buscas reais). `search` recebe `transport` e `sleep` para testar sem rede e sem esperar. |
 | Controle de funil já na fase 1 (novo, contatado, respondeu, fechado, descartado) | É a parte mais valiosa: mostra quantas abordagens são necessárias para fechar um cliente. |
-| Pontuação por regras simples, sem IA | Telefone 3, horário 1, endereço 1, Instagram 1 (máximo 6). Constantes no código, sem arquivo de configuração. |
-| Ordenação por completude do cadastro | O OpenStreetMap não tem nota nem número de avaliações. |
+| Pontuação por regras simples, sem IA, em `scoring.py` | Duas notas independentes (facilidade de contato e oportunidade), cada uma com nível e motivos em português, mais as ofertas (o que vender) e a prioridade. Pesos e níveis em dicionários no topo do módulo, sem arquivo de configuração. |
+| Notas calculadas na leitura, nunca gravadas | Mudar um peso vale na hora para todos os leads, sem migração. |
+| Prioridade alta = oportunidade alta ou máxima mais pelo menos um canal de contato (endereço não conta) | Lead sem como ser abordado não é prioridade, por melhor que seja a oportunidade. |
+| `nao_verificado` e `site_informado` dão oportunidade "indeterminada", nunca baixa | Falta de dado não é prova de nada. |
+| Ordenação por prioridade, depois oportunidade, depois pontos de contato, depois nome | O OpenStreetMap não tem nota nem número de avaliações, e avaliação nunca entra na pontuação. |
 | IDs no formato `node-123` (hífen, não barra) | Barra quebra a rota `/api/leads/{id}`. |
 | `create_app(db_path, searcher)` recebe a busca por injeção | Permite testar a API sem rede. |
-| Estrutura enxuta: `overpass.py`, `db.py`, `main.py`, `static/index.html` | Um módulo por responsabilidade real, sem pastas prematuras. |
-| Design da interface: lista em linhas, faixa do funil no topo, azul de placa sobre fundo frio, uma família tipográfica (Bricolage Grotesque) | Evitar o visual genérico de cartões idênticos. Claro e escuro via `prefers-color-scheme`. |
+| Estrutura enxuta: `overpass.py`, `contacts.py`, `scoring.py`, `filters.py`, `export.py`, `db.py`, `main.py`, `static/index.html` | Um módulo por responsabilidade real, sem pastas prematuras. |
+| Checagem manual em colunas `manual_*` separadas, nunca tocadas pela reimportação. A leitura (`db.to_lead`) sobrepõe o manual ao mapa | O dado que o Matheus conferiu vale mais que o do mapa e não pode se perder numa nova busca. |
+| "Sem site" confirmado é a coluna `absence_confirmed_at`, que sobrepõe o estado do site na leitura. Desfazer é apagar a data. Some se o mapa passar a informar um site | Reversível sem guardar o estado anterior. |
+| Site manual só aceita site próprio. Instagram vai no campo próprio | Evita misturar rede social com site. |
+| Filtros e exportação no servidor, pela mesma função (`filters.apply`). Bairro e cidade comparados sem maiúsculas e acentos | O arquivo exportado é exatamente o que está na tela. |
+| Exportação vazia devolve 404 com mensagem, sem arquivo | Não gerar arquivo vazio em silêncio. |
+| CSV em UTF-8 com BOM e `;`, telefone em formato nacional, células com `=`, `@`, tab, CR ou `+`/`-` que não sejam telefone recebem `'` na frente | Abrir certo no Excel pt-BR e evitar CSV Injection sem corromper telefone. |
+| Histórico de etapas na tabela `status_changes`, gravado só quando a etapa muda | Base para medir quantas abordagens levam a um cliente. Ainda não aparece na tela. |
+| Lugares com site **não são mais descartados**. O campo de site é classificado em próprio, rede social, página de links, delivery ou WhatsApp | Saber quem só tem Instagram ou Linktree é oportunidade, e quem tem site pode precisar de reformulação. |
+| Estados do site: `nao_verificado`, `sem_site_na_fonte`, `so_rede_social`, `site_informado` (vindos da fonte) e `site_ok`, `site_com_problemas`, `site_inacessivel`, `ausencia_confirmada` (verificação futura ou ação manual) | Separar ausência de informação de ausência verificada. |
+| Migração aditiva por `PRAGMA user_version`, com cópia do banco antes | Nunca perder status, anotações nem IDs. |
+| Reimportar atualiza os dados do mapa. Contato ausente na fonte não apaga o já conhecido. Status, anotações e favorito nunca mudam. Lead descartado não é tocado. Estado de site verificado só volta ao da fonte se o site mudar | O mapa melhora com o tempo, mas o trabalho do Matheus é dele. |
+| Deduplicação pelo ID do OSM. Fallback: mesmo nome normalizado, tipos diferentes (ponto e área) e até cerca de 50 m (`SAME_PLACE_DEGREES`). Telefone nunca é chave | O mesmo lugar às vezes aparece como ponto e como área. |
+| Telefone guardado como veio e também normalizado (DDD mais número) com tipo `fixo`, `celular`, `outro` ou `invalido` | WhatsApp só pode ser "potencial", e só para celular. |
+| Design da interface (redesenhada em 03/11/2026): barra lateral escura com quatro seções (Buscar, Leads, Planilha, Funil), indicadores no topo, tabela com selos coloridos, funil em colunas, painel lateral com os detalhes de cada lead, fonte Inter, índigo como cor de destaque | Seguir o padrão de ferramentas de vendas que o Matheus indicou como referência. Claro e escuro via `prefers-color-scheme`. |
+| Buscar (buscar no mapa) e Leads (trabalhar a lista) são seções separadas. Buscar também lista as "áreas que você já buscou", derivadas dos leads salvos (`filters.areas`), sem tabela de buscas. Depois de uma busca o app abre Leads filtrado no que chegou | Buscar leva meio minuto e usa serviço externo, filtrar é instantâneo. Misturar as duas confundia. Limite: uma busca que não trouxe nenhum lead não aparece no histórico. Leads antigos sem cidade se juntam à área de mesmo segmento e bairro só quando existe uma única cidade possível. |
+| A Planilha mostra as linhas do Leads CSV, montadas por `export.table` a partir da mesma função do arquivo (`lead_row`) | O Matheus não tem como abrir CSV. Tela e arquivo nunca divergem. A tela mostra fórmulas como texto, sem a proteção do arquivo, porque o navegador não as executa. |
+| Sem nota de 0 a 100 e sem estrelas de avaliação na interface, ao contrário das referências | Não há dado que sustente essa precisão, e o OpenStreetMap não tem avaliações. Ficam os níveis com motivos. |
 
 ## Estado atual
 
-- Projeto funcional, entregue em `leadfinder/` com 13 arquivos.
-- **37 testes passando** (consulta ao mapa, filtro de site, pontuação, banco, API).
-- Tela validada num DOM simulado (jsdom) com 24 checagens: etapas, contagens, links, WhatsApp só para celular, salvar anotação sem perder o foco, troca de status.
-- Servidor sobe e responde. A busca real falha de forma limpa quando não há rede.
-- **A busca real contra o OpenStreetMap ainda não foi executada.** O ambiente onde o código foi escrito não alcança esses serviços. A primeira execução real é na máquina do Matheus, e qualquer erro dela é o próximo ponto a corrigir.
+- Evolução em fases descrita em `PROMPT-evolucao-leadfinder.md`. **Fases 2, 3 e 4 concluídas em 03/11/2026** (dados e ingestão; pontuação e ofertas; checagem manual, filtros, favoritos e CSV). **Próximo passo: a pausa para prospectar**, sem código novo até o Matheus ter abordado leads reais.
+- **291 testes passando** (contatos, pontuação, filtros, exportação, consulta ao mapa, classificação de site, banco, migrações, API).
+- Tela nova validada num DOM simulado (jsdom) contra o servidor real, com 54 leads reais migrados mais 4 sintéticos, em 58 checagens, incluindo a lista de bairros e a troca de cidade: as quatro seções, o histórico de áreas, "Ver leads", "Buscar de novo", a volta para Leads depois da busca, a Planilha com as mesmas colunas e linhas do Leads CSV, o funil, o painel do lead (checagem manual, confirmar e desfazer "sem site", etapa, anotação), filtros, favoritos, exportação e busca com bairro em minúsculas.
+- O visual foi conferido em capturas do Edge headless no modo escuro (Buscar, Leads, Planilha, Funil, 1440 px e 500 px). Essas capturas pegaram um erro que o jsdom não vê: regras de `display` anulavam o atributo `hidden`, hoje corrigido por `[hidden] { display: none !important }`. **Não verificado:** o painel lateral aberto, o tema claro, a largura de 390 px, a abertura do CSV no Excel pt-BR e a tela com um navegador interativo.
+- A coluna `score` (completude de 0 a 6) continua sendo gravada pela ingestão, mas não é mais exibida nem usada para ordenar.
+- Busca real executada em 03/11/2026 (restaurante em Pinheiros): 61 lugares, 54 sem site na fonte, 7 com site próprio, 11 com telefone (todos fixos), nenhum com Instagram, e-mail ou WhatsApp.
+- Migração validada com um banco real criado pelo código antigo: 54 leads preservados com status e anotações.
+- **A reimportação real com o código novo ainda não rodou:** o Overpass respondeu 502 nas duas tentativas seguintes. Ela está coberta só por testes com dados simulados.
 
 ## Limites conhecidos (não esconda do Matheus)
 
@@ -74,7 +99,13 @@ Nota sobre o "tribunal": o Matheus viu uma skill com esse comportamento (consult
 - Cobertura do OpenStreetMap no Brasil é incompleta.
 - Bairros pequenos podem vir do Nominatim como ponto, sem área. O código expande a área mínima (`MIN_HALF_SPAN = 0.008` grau, cerca de 900 m), mas o resultado deve ser conferido.
 - Nominatim e Overpass têm política de uso justo. Uso pessoal e moderado, com `User-Agent` identificado. Sem laços de busca em massa.
-- Busca de bairro grande (ou da cidade inteira) pode estourar o tempo do Overpass.
+- Busca de bairro grande (ou da cidade inteira) pode estourar o tempo do Overpass. Uma busca de bairro levou 26 s, e o Overpass público às vezes responde 502. Com as novas tentativas, uma busca em momento ruim pode levar alguns minutos, e se todas falharem a tela avisa para esperar um minuto.
+- O Nominatim pode devolver um ponto em vez do bairro. Para "Pinheiros, São Paulo" o primeiro resultado é a estação de trem. Os bairros da lista contornam isso, mas a área buscada continua sendo uma caixa de cerca de 1,8 km em volta do ponto, não o contorno do bairro.
+- A lista de bairros tem subdivisões pequenas ("Jardim X", conjuntos habitacionais, COHAB) e não distingue dois bairros com o mesmo nome em pontos diferentes: fica o de maior categoria. "Brooklin" aparece só como "Brooklin Novo" e "Brooklin Velho". A lista é uma foto de 03/11/2026.
+- Alguns endereços do mapa trazem a cidade sem acento ("Sao Paulo"). Filtros e histórico tratam as duas grafias como a mesma.
+- A UF vem de `addr:state` quando existe (quase nunca no Brasil) e, senão, do `ISO3166-2-lvl4` do Nominatim. A cidade vem de `addr:city` e, senão, da busca.
+- Leads gravados antes da migração ficam `nao_verificado` e sem cidade nem UF até serem reimportados.
+- Site com valor inválido no mapa é tratado como `sem_site_na_fonte`.
 
 ## Fora do escopo por enquanto
 
@@ -83,7 +114,26 @@ Só entra depois que o Matheus tiver abordado leads reais, e cada item passa pel
 1. Importação dos dados abertos do CNPJ (Receita Federal) filtrando por CNAE, município e data de abertura, para achar empresas recém-abertas, que ainda não têm site. O dump é grande, então importar só os CNAEs e municípios de interesse.
 2. Checagem automática de site e PageSpeed (gratuita) para leads que têm site ruim.
 3. Geração da mensagem de abordagem personalizada com a API da Anthropic (tem custo, então decidir com o Matheus).
-4. Filtro por bairro e segmento na lista da interface.
+4. Planilha Excel (XLSX) com aba de resumo, enriquecimento de sites e busca em várias cidades: fases 5, 6 e 7 do prompt, decididas depois da pausa.
+
+## Segmentos candidatos (medidos no OpenStreetMap em 03/11/2026)
+
+Contagem de negócios com nome numa caixa que cobre São Paulo e um pouco dos vizinhos (inclui redes e franquias, e "sem site" quer dizer sem site cadastrado no mapa). Telefone no mapa: 20% a 50% conforme o segmento.
+
+| Segmento (tags) | Negócios | Sem site no mapa |
+|---|---|---|
+| Clínicas e consultórios (`amenity=doctors`, `clinic`, `healthcare=doctor`, `clinic`) | 763 | 88% |
+| Oficina mecânica (`shop=car_repair`) | 751 | 92% |
+| Pet shop e banho e tosa (`shop=pet`, `pet_grooming`) | 365 | 90% |
+| Confeitaria e doceria (`shop=pastry`, `confectionery`) | 207 | 90% |
+| Sorveteria (`amenity=ice_cream`) | 216 | 89% |
+| Ótica (`shop=optician`) | 245 | 94% |
+| Veterinário (`amenity=veterinary`) | 178 | 79% |
+| Imobiliária (`office=estate_agent`) | 148 | 85% |
+| Autoescola (`amenity=driving_school`) | 88 | 93% |
+| Escola de idiomas (`amenity=language_school`) | 118 | 75% |
+
+Ficam de fora: `shop=barber` (0 resultados; as barbearias já entram em `shop=hairdresser`), fisioterapia, psicologia, eletricista, encanador e chaveiro (o OpenStreetMap quase não os mapeia, de 2 a 30 por tipo). Segmentos de comida novos precisam entrar em `FOOD_SEGMENTS` no `scoring.py` para ganhar a oferta de cardápio digital.
 
 ## Regra de ouro do negócio
 
@@ -99,7 +149,8 @@ O gargalo do side hustle é **fechar clientes, não achar leads**. Uma ferrament
 ## Como rodar
 
 ```
-python -m venv .venv && source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\Activate.ps1          (Windows; no Linux/macOS: source .venv/bin/activate)
 pip install -r requirements.txt
 python -m pytest
 python -m uvicorn main:app
@@ -109,15 +160,20 @@ A interface fica em `http://localhost:8000`. O banco é o `leads.db`, na pasta d
 
 ## Mapa do código
 
-- `overpass.py`: segmentos (`SEGMENTS`), geocodificação no Nominatim, consulta ao Overpass, `parse_places` (descarta quem tem `website`, `contact:website`, `url` ou `contact:url`) e pontuação. A função `search` devolve `{"total": n, "leads": [...]}`.
-- `db.py`: tabela `leads` com `status` validado por `CHECK`. `add_leads` usa `INSERT OR IGNORE`, então rebuscar nunca apaga status nem anotações.
-- `main.py`: rotas `GET /`, `GET /api/segments`, `GET /api/leads`, `POST /api/search`, `PATCH /api/leads/{id}`.
-- `static/index.html`: tela única, sem dependências além da fonte do Google Fonts (com alternativa do sistema).
+- `overpass.py`: segmentos (`SEGMENTS`), geocodificação no Nominatim (área e UF), consulta ao Overpass, `parse_places` (todos os lugares com nome, com `presence` classificando site e redes) e pontuação. A função `search` devolve `{"total": n, "leads": [...]}`.
+- `places.py`: `names(city)` e `find(bairro, cidade)` leem `bairros_sp.json` (só São Paulo). `from_overpass` transforma a resposta do mapa na lista, `save` grava e `refresh` baixa tudo (`python places.py`).
+- `contacts.py`: funções puras e listas configuráveis. `normalize_phone`, `normalize_uf`, `normalize_url` (só http e https, sem credenciais, sem parâmetros de rastreamento em `TRACKING_PARAMS`), `classify_url` (domínios em `URL_KINDS`), `is_free_site` (`FREE_SITE_HOSTS`) e `email_kind` (próprio ou genérico, por `GENERIC_EMAIL_DOMAINS`; e-mail inválido só na Fase 5).
+- `scoring.py`: `evaluate(lead)` devolve `contact`, `opportunity`, `offers` e `priority`. `ranked(leads)` anexa a avaliação em `evaluation` e ordena. Para adicionar uma oferta, inclua-a em `OFFERS` e a regra em `offer_keys`.
+- `filters.py`: `apply(leads, wanted)` (uma regra por filtro, em `matches`), `SITE_FILTERS` e `options` (valores distintos para os menus).
+- `export.py`: `leads_csv` (colunas comerciais em português), `full_csv` (todas as colunas mais a avaliação), `csv_safe` e `file_name`.
+- `db.py`: tabela `leads` com `status` e `site_state` validados por `CHECK`. `connect` aplica `MIGRATIONS` conforme o `user_version`, com backup antes. `add_leads` faz upsert (veja as decisões) e devolve quantos são novos. `update_lead(conn, id, **campos)` aceita só os campos de `EDITABLE` mais `absence_confirmed`, data a checagem manual e grava o histórico. `to_lead` monta a visão efetiva (manual por cima do mapa). `other_links` é uma lista guardada em JSON.
+- `main.py`: rotas `GET /`, `GET /api/segments`, `GET /api/leads` (filtros por query, ordenado, cada lead com `evaluation`), `GET /api/filter-options`, `GET /api/neighborhoods?city=` (nomes para a caixa de escolha), `GET /api/areas` (áreas já buscadas), `GET /api/leads-table` (colunas, ids e linhas do Leads CSV, para a Planilha), `GET /api/export/leads` e `GET /api/export/completo` (mesmos filtros mais `status`), `POST /api/search` (devolve `total`, `found`, `without_site`, `added`), `PATCH /api/leads/{id}` (etapa, anotação, favorito, campos `manual_*`, `absence_confirmed`; devolve o lead com `evaluation`).
+- `static/index.html`: página única em HTML, CSS e JS puros, sem build e sem dependências além da fonte Inter do Google Fonts (com alternativa do sistema). Quatro seções (`#buscar`, `#leads`, `#planilha`, `#funil`) e um painel lateral por lead. O estado fica no objeto `state` e tudo é redesenhado por `render()`. Os selos usam os mapas `*_LABELS` e `*_TONES` no topo do script.
 - `tests/`: um arquivo de teste por módulo.
 
 ## Primeira tarefa sugerida no Claude Code
 
-1. Rodar `python -m pytest` e confirmar que os 37 testes passam.
+1. Rodar `python -m pytest` e confirmar que os 291 testes passam.
 2. Subir o servidor e fazer a primeira busca real (por exemplo, restaurante em Pinheiros).
 3. Se algo falhar, corrigir com teste que reproduz o erro antes da correção.
 4. Antes de qualquer funcionalidade nova, perguntar ao Matheus como foi a checagem manual dos primeiros leads.

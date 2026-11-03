@@ -1,0 +1,2988 @@
+{
+ "city": "São Paulo",
+ "uf": "SP",
+ "source": "OpenStreetMap (Overpass)",
+ "downloaded_at": "2026-11-03",
+ "neighborhoods": [
+  {
+   "name": "Aclimação",
+   "lat": -23.5671,
+   "lon": -46.6268
+  },
+  {
+   "name": "Água Branca",
+   "lat": -23.51175,
+   "lon": -46.70216
+  },
+  {
+   "name": "Água Fria",
+   "lat": -23.48179,
+   "lon": -46.62499
+  },
+  {
+   "name": "Água Rasa",
+   "lat": -23.56611,
+   "lon": -46.57077
+  },
+  {
+   "name": "Alto Alegre",
+   "lat": -23.6134,
+   "lon": -46.43175
+  },
+  {
+   "name": "Alto da Lapa",
+   "lat": -23.52739,
+   "lon": -46.71306
+  },
+  {
+   "name": "Alto de Pinheiros",
+   "lat": -23.54991,
+   "lon": -46.70764
+  },
+  {
+   "name": "Alto de Santana",
+   "lat": -23.48878,
+   "lon": -46.63005
+  },
+  {
+   "name": "Alto do Rivieira",
+   "lat": -23.69936,
+   "lon": -46.76172
+  },
+  {
+   "name": "Americanópolis",
+   "lat": -23.67593,
+   "lon": -46.64955
+  },
+  {
+   "name": "Anhanguera",
+   "lat": -23.42099,
+   "lon": -46.80796
+  },
+  {
+   "name": "Aricanduva",
+   "lat": -23.57802,
+   "lon": -46.51145
+  },
+  {
+   "name": "Artur Alvim",
+   "lat": -23.54081,
+   "lon": -46.48623
+  },
+  {
+   "name": "Bairro da Coroa",
+   "lat": -23.51905,
+   "lon": -46.61307
+  },
+  {
+   "name": "Bairro da Luz",
+   "lat": -23.53364,
+   "lon": -46.63196
+  },
+  {
+   "name": "Bairro Siciliano",
+   "lat": -23.53434,
+   "lon": -46.69832
+  },
+  {
+   "name": "Bairro Toca do Tatu",
+   "lat": -23.77841,
+   "lon": -46.66106
+  },
+  {
+   "name": "Barra Funda",
+   "lat": -23.52109,
+   "lon": -46.67366
+  },
+  {
+   "name": "Bela Aliança",
+   "lat": -23.52485,
+   "lon": -46.72251
+  },
+  {
+   "name": "Bela Vista",
+   "lat": -23.56012,
+   "lon": -46.65003
+  },
+  {
+   "name": "Belém",
+   "lat": -23.53488,
+   "lon": -46.59494
+  },
+  {
+   "name": "Bixiga",
+   "lat": -23.55771,
+   "lon": -46.64681
+  },
+  {
+   "name": "Boaçava",
+   "lat": -23.54031,
+   "lon": -46.72261
+  },
+  {
+   "name": "Bom Retiro",
+   "lat": -23.52516,
+   "lon": -46.63816
+  },
+  {
+   "name": "Bortolândia",
+   "lat": -23.45467,
+   "lon": -46.59844
+  },
+  {
+   "name": "Bosque da Saúde",
+   "lat": -23.60942,
+   "lon": -46.62517
+  },
+  {
+   "name": "Brás",
+   "lat": -23.54296,
+   "lon": -46.61725
+  },
+  {
+   "name": "Brasilândia",
+   "lat": -23.46497,
+   "lon": -46.69139
+  },
+  {
+   "name": "Brooklin Novo",
+   "lat": -23.62149,
+   "lon": -46.68832
+  },
+  {
+   "name": "Brooklin Velho",
+   "lat": -23.62714,
+   "lon": -46.68011
+  },
+  {
+   "name": "Burgo Paulista",
+   "lat": -23.52116,
+   "lon": -46.48568
+  },
+  {
+   "name": "Buritizinho",
+   "lat": -23.58361,
+   "lon": -46.42346
+  },
+  {
+   "name": "Butantã",
+   "lat": -23.56936,
+   "lon": -46.72782
+  },
+  {
+   "name": "Caboré - Vila Gil",
+   "lat": -23.59223,
+   "lon": -46.43733
+  },
+  {
+   "name": "Cachoeirinha",
+   "lat": -23.46302,
+   "lon": -46.66107
+  },
+  {
+   "name": "Cambuci",
+   "lat": -23.5673,
+   "lon": -46.61847
+  },
+  {
+   "name": "Campinha",
+   "lat": -23.67537,
+   "lon": -46.68491
+  },
+  {
+   "name": "Campo Belo",
+   "lat": -23.62993,
+   "lon": -46.67042
+  },
+  {
+   "name": "Campo Grande",
+   "lat": -23.6709,
+   "lon": -46.68925
+  },
+  {
+   "name": "Campo Limpo",
+   "lat": -23.6362,
+   "lon": -46.7628
+  },
+  {
+   "name": "Campos Elísios",
+   "lat": -23.53205,
+   "lon": -46.64774
+  },
+  {
+   "name": "Cangaíba",
+   "lat": -23.5059,
+   "lon": -46.53143
+  },
+  {
+   "name": "Canindé",
+   "lat": -23.52699,
+   "lon": -46.62053
+  },
+  {
+   "name": "Capão Redondo",
+   "lat": -23.6711,
+   "lon": -46.77984
+  },
+  {
+   "name": "Carandiru",
+   "lat": -23.51228,
+   "lon": -46.62565
+  },
+  {
+   "name": "Carrão",
+   "lat": -23.54987,
+   "lon": -46.53858
+  },
+  {
+   "name": "Casa Verde",
+   "lat": -23.50593,
+   "lon": -46.65614
+  },
+  {
+   "name": "Casa Verde Alta",
+   "lat": -23.4977,
+   "lon": -46.65658
+  },
+  {
+   "name": "Casa Verde Baixa",
+   "lat": -23.51049,
+   "lon": -46.6571
+  },
+  {
+   "name": "Caxingui",
+   "lat": -23.58045,
+   "lon": -46.71655
+  },
+  {
+   "name": "Cerqueira César",
+   "lat": -23.56104,
+   "lon": -46.66576
+  },
+  {
+   "name": "Chacara Cruzeiro do Sul",
+   "lat": -23.51077,
+   "lon": -46.53405
+  },
+  {
+   "name": "Chácara do Sol",
+   "lat": -23.77894,
+   "lon": -46.67546
+  },
+  {
+   "name": "Chácara Dona Olivia",
+   "lat": -23.51325,
+   "lon": -46.38829
+  },
+  {
+   "name": "Chácara Everest",
+   "lat": -23.59524,
+   "lon": -46.80707
+  },
+  {
+   "name": "Chácara Flora",
+   "lat": -23.64676,
+   "lon": -46.68544
+  },
+  {
+   "name": "Chácara Inglesa",
+   "lat": -23.60831,
+   "lon": -46.63232
+  },
+  {
+   "name": "Chácara Jaraguá",
+   "lat": -23.43802,
+   "lon": -46.79122
+  },
+  {
+   "name": "Chácara Monte Alegre",
+   "lat": -23.64437,
+   "lon": -46.67699
+  },
+  {
+   "name": "Chácara Nani",
+   "lat": -23.70926,
+   "lon": -46.79169
+  },
+  {
+   "name": "Chácara Santa Etelvina",
+   "lat": -23.58636,
+   "lon": -46.40533
+  },
+  {
+   "name": "Chácara Santa Maria",
+   "lat": -23.69544,
+   "lon": -46.79356
+  },
+  {
+   "name": "Chácara Santo Antônio",
+   "lat": -23.62982,
+   "lon": -46.70388
+  },
+  {
+   "name": "Chacára Três Meninas",
+   "lat": -23.47457,
+   "lon": -46.4256
+  },
+  {
+   "name": "Cidade Ademar",
+   "lat": -23.67301,
+   "lon": -46.65528
+  },
+  {
+   "name": "Cidade Antônio Estêvão de Carvalho",
+   "lat": -23.53544,
+   "lon": -46.46993
+  },
+  {
+   "name": "Cidade Domitila",
+   "lat": -23.66284,
+   "lon": -46.64835
+  },
+  {
+   "name": "Cidade Dutra",
+   "lat": -23.71396,
+   "lon": -46.69909
+  },
+  {
+   "name": "Cidade Ipava",
+   "lat": -23.72427,
+   "lon": -46.76277
+  },
+  {
+   "name": "Cidade Jardim",
+   "lat": -23.58983,
+   "lon": -46.69902
+  },
+  {
+   "name": "Cidade Leonor",
+   "lat": -23.64613,
+   "lon": -46.65334
+  },
+  {
+   "name": "Cidade Líder",
+   "lat": -23.56277,
+   "lon": -46.49433
+  },
+  {
+   "name": "Cidade Patriarca",
+   "lat": -23.53256,
+   "lon": -46.50423
+  },
+  {
+   "name": "Cidade Popular",
+   "lat": -23.55557,
+   "lon": -46.40341
+  },
+  {
+   "name": "Cidade Rui Barbosa",
+   "lat": -23.53827,
+   "lon": -46.48438
+  },
+  {
+   "name": "Cidade Satélite Santa Bárbara",
+   "lat": -23.61123,
+   "lon": -46.46402
+  },
+  {
+   "name": "Cidade Tiradentes",
+   "lat": -23.58017,
+   "lon": -46.39706
+  },
+  {
+   "name": "Cidade Vargas",
+   "lat": -23.64639,
+   "lon": -46.63619
+  },
+  {
+   "name": "City América",
+   "lat": -23.49942,
+   "lon": -46.73341
+  },
+  {
+   "name": "City Jaraguá",
+   "lat": -23.43858,
+   "lon": -46.73431
+  },
+  {
+   "name": "City Pinheirinho",
+   "lat": -23.48228,
+   "lon": -46.7353
+  },
+  {
+   "name": "COHAB 2",
+   "lat": -23.54365,
+   "lon": -46.43527
+  },
+  {
+   "name": "COHAB Bancários",
+   "lat": -23.60146,
+   "lon": -46.40319
+  },
+  {
+   "name": "COHAB Barro Branco",
+   "lat": -23.58487,
+   "lon": -46.39342
+  },
+  {
+   "name": "COHAB Casinhas",
+   "lat": -23.58776,
+   "lon": -46.40055
+  },
+  {
+   "name": "COHAB Castro Alves",
+   "lat": -23.58096,
+   "lon": -46.40412
+  },
+  {
+   "name": "COHAB Dom Ângelo",
+   "lat": -23.58165,
+   "lon": -46.38307
+  },
+  {
+   "name": "COHAB Fazenda do Carmo",
+   "lat": -23.56818,
+   "lon": -46.4203
+  },
+  {
+   "name": "COHAB Ferroviários",
+   "lat": -23.59972,
+   "lon": -46.39488
+  },
+  {
+   "name": "COHAB Gráficos",
+   "lat": -23.60922,
+   "lon": -46.39932
+  },
+  {
+   "name": "COHAB Inácio Monteiro",
+   "lat": -23.57021,
+   "lon": -46.40277
+  },
+  {
+   "name": "COHAB Juscelino Kubitschek",
+   "lat": -23.56543,
+   "lon": -46.39651
+  },
+  {
+   "name": "Cohab Monet",
+   "lat": -23.6478,
+   "lon": -46.78914
+  },
+  {
+   "name": "COHAB Pedra Branca",
+   "lat": -23.58197,
+   "lon": -46.419
+  },
+  {
+   "name": "COHAB Prestes Maia",
+   "lat": -23.56816,
+   "lon": -46.40826
+  },
+  {
+   "name": "COHAB Santa Etelvina 2A",
+   "lat": -23.5927,
+   "lon": -46.41116
+  },
+  {
+   "name": "COHAB Santa Etelvina 2B",
+   "lat": -23.58339,
+   "lon": -46.41354
+  },
+  {
+   "name": "COHAB Sarandi",
+   "lat": -23.57679,
+   "lon": -46.41355
+  },
+  {
+   "name": "COHAB Setor G",
+   "lat": -23.59278,
+   "lon": -46.3986
+  },
+  {
+   "name": "COHAB Sítio Casablanca",
+   "lat": -23.57198,
+   "lon": -46.39678
+  },
+  {
+   "name": "COHAB Sitío Conceição",
+   "lat": -23.57955,
+   "lon": -46.39337
+  },
+  {
+   "name": "Cohab Taipas 1",
+   "lat": -23.4435,
+   "lon": -46.71567
+  },
+  {
+   "name": "Colônia",
+   "lat": -23.84917,
+   "lon": -46.69901
+  },
+  {
+   "name": "Comunidade Corrego Jaboticabal",
+   "lat": -23.64248,
+   "lon": -46.60351
+  },
+  {
+   "name": "Comunidade Jardim das Palmas",
+   "lat": -23.62023,
+   "lon": -46.74558
+  },
+  {
+   "name": "Comunidade Travinhas",
+   "lat": -23.62736,
+   "lon": -46.72753
+  },
+  {
+   "name": "Conjunto Habitacional Brigadeiro Faria Lima/BNH",
+   "lat": -23.75522,
+   "lon": -46.68336
+  },
+  {
+   "name": "Conjunto Habitacional Padre Manoel da Nobrega",
+   "lat": -23.5454,
+   "lon": -46.47901
+  },
+  {
+   "name": "Conjunto Habitacional Teotônio Vilela",
+   "lat": -23.60605,
+   "lon": -46.50366
+  },
+  {
+   "name": "Conjunto Promorar Raposo Tavares",
+   "lat": -23.58694,
+   "lon": -46.79938
+  },
+  {
+   "name": "Conjuto Habitacional Turistica",
+   "lat": -23.475,
+   "lon": -46.75669
+  },
+  {
+   "name": "Consolação",
+   "lat": -23.54924,
+   "lon": -46.66013
+  },
+  {
+   "name": "Cursino",
+   "lat": -23.63529,
+   "lon": -46.6213
+  },
+  {
+   "name": "Engenheiro Goulart",
+   "lat": -23.50045,
+   "lon": -46.52782
+  },
+  {
+   "name": "Ermelino Matarazzo",
+   "lat": -23.49026,
+   "lon": -46.4824
+  },
+  {
+   "name": "Estrada Vitório Trentin",
+   "lat": -23.72304,
+   "lon": -46.79796
+  },
+  {
+   "name": "Favela CEU Atlantica",
+   "lat": -23.48178,
+   "lon": -46.76324
+  },
+  {
+   "name": "Fazenda da Juta",
+   "lat": -23.61992,
+   "lon": -46.49028
+  },
+  {
+   "name": "Ferreira",
+   "lat": -23.60764,
+   "lon": -46.74973
+  },
+  {
+   "name": "Freguesia do Ó",
+   "lat": -23.48746,
+   "lon": -46.69513
+  },
+  {
+   "name": "Furnas",
+   "lat": -23.44313,
+   "lon": -46.59357
+  },
+  {
+   "name": "Gleba do Pêssego",
+   "lat": -23.57135,
+   "lon": -46.43437
+  },
+  {
+   "name": "Glicério",
+   "lat": -23.55306,
+   "lon": -46.62901
+  },
+  {
+   "name": "Grajaú",
+   "lat": -23.77997,
+   "lon": -46.67377
+  },
+  {
+   "name": "Grand Reserva Paulista",
+   "lat": -23.5016,
+   "lon": -46.71963
+  },
+  {
+   "name": "Granja Julieta",
+   "lat": -23.63589,
+   "lon": -46.70579
+  },
+  {
+   "name": "Guaianases",
+   "lat": -23.55226,
+   "lon": -46.40695
+  },
+  {
+   "name": "Higienópolis",
+   "lat": -23.54429,
+   "lon": -46.65445
+  },
+  {
+   "name": "Horto Florestal",
+   "lat": -23.45438,
+   "lon": -46.62874
+  },
+  {
+   "name": "Iguaçu",
+   "lat": -23.61308,
+   "lon": -46.52188
+  },
+  {
+   "name": "Iguatemi",
+   "lat": -23.61107,
+   "lon": -46.42504
+  },
+  {
+   "name": "Imirim",
+   "lat": -23.4911,
+   "lon": -46.64706
+  },
+  {
+   "name": "Indianópolis",
+   "lat": -23.60746,
+   "lon": -46.66892
+  },
+  {
+   "name": "Indústrias do Iguatemi",
+   "lat": -23.60659,
+   "lon": -46.4099
+  },
+  {
+   "name": "Interlagos",
+   "lat": -23.70117,
+   "lon": -46.70829
+  },
+  {
+   "name": "Ipiranga",
+   "lat": -23.59454,
+   "lon": -46.60267
+  },
+  {
+   "name": "Itaim Bibi",
+   "lat": -23.58438,
+   "lon": -46.67844
+  },
+  {
+   "name": "Itaim Paulista",
+   "lat": -23.50176,
+   "lon": -46.39961
+  },
+  {
+   "name": "Itaquera",
+   "lat": -23.53608,
+   "lon": -46.45551
+  },
+  {
+   "name": "Jabaquara",
+   "lat": -23.64871,
+   "lon": -46.64545
+  },
+  {
+   "name": "Jaçanã",
+   "lat": -23.46299,
+   "lon": -46.58244
+  },
+  {
+   "name": "Jaguara",
+   "lat": -23.51382,
+   "lon": -46.74723
+  },
+  {
+   "name": "Jaguaré",
+   "lat": -23.54922,
+   "lon": -46.74407
+  },
+  {
+   "name": "Jaraguá",
+   "lat": -23.45568,
+   "lon": -46.73951
+  },
+  {
+   "name": "Jardim Almanara",
+   "lat": -23.47458,
+   "lon": -46.67503
+  },
+  {
+   "name": "Jardim Almeida",
+   "lat": -23.80133,
+   "lon": -46.72849
+  },
+  {
+   "name": "Jardim Almeida Prado",
+   "lat": -23.77989,
+   "lon": -46.68999
+  },
+  {
+   "name": "Jardim Alpino",
+   "lat": -23.74621,
+   "lon": -46.71135
+  },
+  {
+   "name": "Jardim Alvorada",
+   "lat": -23.66422,
+   "lon": -46.78406
+  },
+  {
+   "name": "Jardim Amaralina",
+   "lat": -23.6042,
+   "lon": -46.79864
+  },
+  {
+   "name": "Jardim Amélia",
+   "lat": -23.66725,
+   "lon": -46.7886
+  },
+  {
+   "name": "Jardim América",
+   "lat": -23.56964,
+   "lon": -46.67201
+  },
+  {
+   "name": "Jardim América da Penha",
+   "lat": -23.51868,
+   "lon": -46.55328
+  },
+  {
+   "name": "Jardim Anália Franco",
+   "lat": -23.55578,
+   "lon": -46.56226
+  },
+  {
+   "name": "Jardim Ângela",
+   "lat": -23.71253,
+   "lon": -46.76872
+  },
+  {
+   "name": "Jardim Apurá",
+   "lat": -23.71237,
+   "lon": -46.65843
+  },
+  {
+   "name": "Jardim Aracati",
+   "lat": -23.72234,
+   "lon": -46.77192
+  },
+  {
+   "name": "Jardim Arantes",
+   "lat": -23.62293,
+   "lon": -46.41695
+  },
+  {
+   "name": "Jardim Arpoador",
+   "lat": -23.59498,
+   "lon": -46.79108
+  },
+  {
+   "name": "Jardim Assunção",
+   "lat": -23.53931,
+   "lon": -46.51081
+  },
+  {
+   "name": "Jardim Augusto",
+   "lat": -23.59687,
+   "lon": -46.4486
+  },
+  {
+   "name": "Jardim Áurea",
+   "lat": -23.56447,
+   "lon": -46.41733
+  },
+  {
+   "name": "Jardim Aurélia",
+   "lat": -23.59594,
+   "lon": -46.62416
+  },
+  {
+   "name": "Jardim Bandeirantes",
+   "lat": -23.60263,
+   "lon": -46.43615
+  },
+  {
+   "name": "Jardim Boa Vista",
+   "lat": -23.58154,
+   "lon": -46.79135
+  },
+  {
+   "name": "Jardim Brasil",
+   "lat": -23.48191,
+   "lon": -46.57645
+  },
+  {
+   "name": "Jardim Brasília",
+   "lat": -23.55464,
+   "lon": -46.49274
+  },
+  {
+   "name": "Jardim Britânia",
+   "lat": -23.43455,
+   "lon": -46.7836
+  },
+  {
+   "name": "Jardim Caiçara",
+   "lat": -23.68477,
+   "lon": -46.77615
+  },
+  {
+   "name": "Jardim Camargo Novo",
+   "lat": -23.50434,
+   "lon": -46.38377
+  },
+  {
+   "name": "Jardim Casa Grande",
+   "lat": -23.79647,
+   "lon": -46.71276
+  },
+  {
+   "name": "Jardim CIbele",
+   "lat": -23.57673,
+   "lon": -46.43944
+  },
+  {
+   "name": "Jardim Conquista",
+   "lat": -23.60736,
+   "lon": -46.44813
+  },
+  {
+   "name": "Jardim Copacabana",
+   "lat": -23.69099,
+   "lon": -46.7716
+  },
+  {
+   "name": "Jardim Cruzeiro",
+   "lat": -23.71584,
+   "lon": -46.71016
+  },
+  {
+   "name": "Jardim D'Abril",
+   "lat": -23.57387,
+   "lon": -46.77952
+  },
+  {
+   "name": "Jardim da Glória",
+   "lat": -23.58272,
+   "lon": -46.62198
+  },
+  {
+   "name": "Jardim da Saúde",
+   "lat": -23.6172,
+   "lon": -46.61854
+  },
+  {
+   "name": "Jardim Danfer",
+   "lat": -23.5025,
+   "lon": -46.50675
+  },
+  {
+   "name": "Jardim das Flôres",
+   "lat": -23.68004,
+   "lon": -46.76334
+  },
+  {
+   "name": "Jardim das Oliveiras",
+   "lat": -23.49325,
+   "lon": -46.37812
+  },
+  {
+   "name": "Jardim das Pedras",
+   "lat": -23.77901,
+   "lon": -46.68476
+  },
+  {
+   "name": "Jardim das Rosas",
+   "lat": -23.60309,
+   "lon": -46.44019
+  },
+  {
+   "name": "Jardim Dom José",
+   "lat": -23.6749,
+   "lon": -46.79592
+  },
+  {
+   "name": "Jardim dos Álamos",
+   "lat": -23.81151,
+   "lon": -46.73749
+  },
+  {
+   "name": "Jardim dos Cunhas",
+   "lat": -23.56631,
+   "lon": -46.41384
+  },
+  {
+   "name": "Jardim dos Estados",
+   "lat": -23.6372,
+   "lon": -46.68241
+  },
+  {
+   "name": "Jardim Dracena",
+   "lat": -23.59276,
+   "lon": -46.75973
+  },
+  {
+   "name": "Jardim Ester",
+   "lat": -23.58137,
+   "lon": -46.76557
+  },
+  {
+   "name": "Jardim Etelvina",
+   "lat": -23.53018,
+   "lon": -46.41925
+  },
+  {
+   "name": "Jardim Europa",
+   "lat": -23.5737,
+   "lon": -46.68231
+  },
+  {
+   "name": "Jardim Fontalis",
+   "lat": -23.43583,
+   "lon": -46.57707
+  },
+  {
+   "name": "Jardim França",
+   "lat": -23.47718,
+   "lon": -46.61439
+  },
+  {
+   "name": "Jardim Germânia",
+   "lat": -23.65722,
+   "lon": -46.75922
+  },
+  {
+   "name": "Jardim Guapira",
+   "lat": -23.45737,
+   "lon": -46.58872
+  },
+  {
+   "name": "Jardim Guaraú",
+   "lat": -23.59544,
+   "lon": -46.76665
+  },
+  {
+   "name": "Jardim Guarujá",
+   "lat": -23.69373,
+   "lon": -46.78989
+  },
+  {
+   "name": "Jardim Helena",
+   "lat": -23.47963,
+   "lon": -46.41968
+  },
+  {
+   "name": "Jardim Helena (Guaianases)",
+   "lat": -23.54026,
+   "lon": -46.42893
+  },
+  {
+   "name": "Jardim Helga",
+   "lat": -23.64296,
+   "lon": -46.77388
+  },
+  {
+   "name": "Jardim Herplin",
+   "lat": -23.78883,
+   "lon": -46.71537
+  },
+  {
+   "name": "Jardim Horizonte Azul",
+   "lat": -23.74091,
+   "lon": -46.78174
+  },
+  {
+   "name": "Jardim Iguatemi",
+   "lat": -23.59937,
+   "lon": -46.44235
+  },
+  {
+   "name": "Jardim Imperador",
+   "lat": -23.58638,
+   "lon": -46.4996
+  },
+  {
+   "name": "Jardim Imperador (Zona Sul)",
+   "lat": -23.64327,
+   "lon": -46.60711
+  },
+  {
+   "name": "Jardim Ipanema",
+   "lat": -23.56234,
+   "lon": -46.49737
+  },
+  {
+   "name": "Jardim Ipê",
+   "lat": -23.50022,
+   "lon": -46.41454
+  },
+  {
+   "name": "Jardim Iporã",
+   "lat": -23.78397,
+   "lon": -46.71179
+  },
+  {
+   "name": "Jardim Iporanga",
+   "lat": -23.7271,
+   "lon": -46.70409
+  },
+  {
+   "name": "Jardim Iracema",
+   "lat": -23.64192,
+   "lon": -46.7867
+  },
+  {
+   "name": "Jardim Itacolomi",
+   "lat": -23.66256,
+   "lon": -46.65195
+  },
+  {
+   "name": "Jardim Itajaí",
+   "lat": -23.76285,
+   "lon": -46.6896
+  },
+  {
+   "name": "Jardim Jabaquara",
+   "lat": -23.66101,
+   "lon": -46.65838
+  },
+  {
+   "name": "Jardim Japão",
+   "lat": -23.50218,
+   "lon": -46.58089
+  },
+  {
+   "name": "Jardim Jaqueline",
+   "lat": -23.59458,
+   "lon": -46.75366
+  },
+  {
+   "name": "Jardim João XXIII",
+   "lat": -23.60285,
+   "lon": -46.79271
+  },
+  {
+   "name": "Jardim Jordanópolis",
+   "lat": -23.73278,
+   "lon": -46.69901
+  },
+  {
+   "name": "Jardim Jussara",
+   "lat": -23.59554,
+   "lon": -46.75972
+  },
+  {
+   "name": "Jardim Keralux",
+   "lat": -23.48238,
+   "lon": -46.49364
+  },
+  {
+   "name": "Jardim Laranjeiras",
+   "lat": -23.60396,
+   "lon": -46.43227
+  },
+  {
+   "name": "Jardim Leonor Mendes de Barros",
+   "lat": -23.46624,
+   "lon": -46.61063
+  },
+  {
+   "name": "Jardim Líbano",
+   "lat": -23.48566,
+   "lon": -46.7327
+  },
+  {
+   "name": "Jardim Lisboa",
+   "lat": -23.51912,
+   "lon": -46.49796
+  },
+  {
+   "name": "Jardim Luis Fernando",
+   "lat": -23.59354,
+   "lon": -46.44113
+  },
+  {
+   "name": "Jardim Maia",
+   "lat": -23.49403,
+   "lon": -46.41404
+  },
+  {
+   "name": "Jardim Manacá da Serra",
+   "lat": -23.79596,
+   "lon": -46.70745
+  },
+  {
+   "name": "Jardim Mangalot",
+   "lat": -23.49163,
+   "lon": -46.7476
+  },
+  {
+   "name": "Jardim Marajoara",
+   "lat": -23.65536,
+   "lon": -46.68494
+  },
+  {
+   "name": "Jardim Marília",
+   "lat": -23.56683,
+   "lon": -46.49664
+  },
+  {
+   "name": "Jardim Marilú",
+   "lat": -23.59863,
+   "lon": -46.42275
+  },
+  {
+   "name": "Jardim Maristela",
+   "lat": -23.48846,
+   "lon": -46.75244
+  },
+  {
+   "name": "Jardim Melo",
+   "lat": -23.68654,
+   "lon": -46.6352
+  },
+  {
+   "name": "Jardim Miriam",
+   "lat": -23.681,
+   "lon": -46.63966
+  },
+  {
+   "name": "Jardim Modelo",
+   "lat": -23.46781,
+   "lon": -46.57568
+  },
+  {
+   "name": "Jardim Moraes Prado",
+   "lat": -23.77392,
+   "lon": -46.68227
+  },
+  {
+   "name": "Jardim Myrna",
+   "lat": -23.77067,
+   "lon": -46.69364
+  },
+  {
+   "name": "Jardim Nardini",
+   "lat": -23.48081,
+   "lon": -46.76129
+  },
+  {
+   "name": "Jardim Nordeste",
+   "lat": -23.53014,
+   "lon": -46.48646
+  },
+  {
+   "name": "Jardim Noronha",
+   "lat": -23.76969,
+   "lon": -46.67778
+  },
+  {
+   "name": "Jardim Nossa Senhora do Ó",
+   "lat": -23.50297,
+   "lon": -46.70417
+  },
+  {
+   "name": "Jardim Novo Parelheiros",
+   "lat": -23.82106,
+   "lon": -46.72641
+  },
+  {
+   "name": "Jardim Oriental",
+   "lat": -23.64485,
+   "lon": -46.64842
+  },
+  {
+   "name": "Jardim Pantanal",
+   "lat": -23.47939,
+   "lon": -46.40912
+  },
+  {
+   "name": "Jardim Papai Noel",
+   "lat": -23.82547,
+   "lon": -46.7024
+  },
+  {
+   "name": "Jardim Paraíso",
+   "lat": -23.80037,
+   "lon": -46.71221
+  },
+  {
+   "name": "Jardim Parque Morumbi",
+   "lat": -23.62316,
+   "lon": -46.72879
+  },
+  {
+   "name": "Jardim Patente",
+   "lat": -23.62763,
+   "lon": -46.58688
+  },
+  {
+   "name": "Jardim Paulista",
+   "lat": -23.56522,
+   "lon": -46.66018
+  },
+  {
+   "name": "Jardim Paulo VI",
+   "lat": -23.59972,
+   "lon": -46.78723
+  },
+  {
+   "name": "Jardim Pedro José Nunes",
+   "lat": -23.50151,
+   "lon": -46.46579
+  },
+  {
+   "name": "Jardim Peri",
+   "lat": -23.45709,
+   "lon": -46.66688
+  },
+  {
+   "name": "Jardim Pérola 1",
+   "lat": -23.58521,
+   "lon": -46.38549
+  },
+  {
+   "name": "Jardim Pérola 2",
+   "lat": -23.58828,
+   "lon": -46.38159
+  },
+  {
+   "name": "Jardim Petrópolis",
+   "lat": -23.63167,
+   "lon": -46.68391
+  },
+  {
+   "name": "jardim piratininga",
+   "lat": -23.50047,
+   "lon": -46.53444
+  },
+  {
+   "name": "Jardim Pirituba",
+   "lat": -23.43678,
+   "lon": -46.72053
+  },
+  {
+   "name": "Jardim Popular",
+   "lat": -23.51682,
+   "lon": -46.50494
+  },
+  {
+   "name": "Jardim Porto Velho",
+   "lat": -23.77343,
+   "lon": -46.67623
+  },
+  {
+   "name": "Jardim Premiano",
+   "lat": -23.59652,
+   "lon": -46.41752
+  },
+  {
+   "name": "Jardim Presidente",
+   "lat": -23.73031,
+   "lon": -46.70208
+  },
+  {
+   "name": "Jardim Previdência",
+   "lat": -23.62258,
+   "lon": -46.61752
+  },
+  {
+   "name": "Jardim Primeiro de Maio",
+   "lat": -23.58099,
+   "lon": -46.385
+  },
+  {
+   "name": "Jardim Prudência",
+   "lat": -23.65262,
+   "lon": -46.67178
+  },
+  {
+   "name": "Jardim Ranieri",
+   "lat": -23.69359,
+   "lon": -46.78101
+  },
+  {
+   "name": "Jardim Regina",
+   "lat": -23.47376,
+   "lon": -46.74201
+  },
+  {
+   "name": "Jardim Robru",
+   "lat": -23.5221,
+   "lon": -46.4122
+  },
+  {
+   "name": "Jardim Romano",
+   "lat": -23.48037,
+   "lon": -46.38409
+  },
+  {
+   "name": "Jardim Rosa Maria",
+   "lat": -23.59182,
+   "lon": -46.77103
+  },
+  {
+   "name": "Jardim Rosana",
+   "lat": -23.64652,
+   "lon": -46.77445
+  },
+  {
+   "name": "Jardim Roseli",
+   "lat": -23.59616,
+   "lon": -46.44049
+  },
+  {
+   "name": "Jardim Sabiá",
+   "lat": -23.78316,
+   "lon": -46.69114
+  },
+  {
+   "name": "Jardim Santa Cruz",
+   "lat": -23.64061,
+   "lon": -46.59742
+  },
+  {
+   "name": "Jardim Santa Fé",
+   "lat": -23.4269,
+   "lon": -46.79471
+  },
+  {
+   "name": "Jardim Santa Mônica",
+   "lat": -23.4769,
+   "lon": -46.74692
+  },
+  {
+   "name": "Jardim Santa Terezinha",
+   "lat": -23.85246,
+   "lon": -46.69633
+  },
+  {
+   "name": "Jardim Santo Amaro",
+   "lat": -23.65217,
+   "lon": -46.69602
+  },
+  {
+   "name": "Jardim Santo Antoninho",
+   "lat": -23.65689,
+   "lon": -46.66659
+  },
+  {
+   "name": "Jardim Santo Elias",
+   "lat": -23.50491,
+   "lon": -46.75879
+  },
+  {
+   "name": "Jardim São Benedito",
+   "lat": -23.59342,
+   "lon": -46.42162
+  },
+  {
+   "name": "Jardim São Bento",
+   "lat": -23.50505,
+   "lon": -46.64875
+  },
+  {
+   "name": "Jardim São Bernardo",
+   "lat": -23.75599,
+   "lon": -46.70079
+  },
+  {
+   "name": "Jardim São Carlos",
+   "lat": -23.51027,
+   "lon": -46.47211
+  },
+  {
+   "name": "Jardim São Carlos (Guaianazes)",
+   "lat": -23.55818,
+   "lon": -46.41406
+  },
+  {
+   "name": "Jardim São Gonçalo",
+   "lat": -23.59599,
+   "lon": -46.45634
+  },
+  {
+   "name": "Jardim São João",
+   "lat": -23.54739,
+   "lon": -46.42503
+  },
+  {
+   "name": "Jardim São Jorge",
+   "lat": -23.58918,
+   "lon": -46.78629
+  },
+  {
+   "name": "Jardim São Lourenço",
+   "lat": -23.7042,
+   "lon": -46.7882
+  },
+  {
+   "name": "Jardim São Luís",
+   "lat": -23.67393,
+   "lon": -46.74074
+  },
+  {
+   "name": "Jardim São Luís (Zona leste)",
+   "lat": -23.49613,
+   "lon": -46.38629
+  },
+  {
+   "name": "Jardim São Nicolau",
+   "lat": -23.82762,
+   "lon": -46.69749
+  },
+  {
+   "name": "Jardim São Norberto",
+   "lat": -23.81887,
+   "lon": -46.70505
+  },
+  {
+   "name": "Jardim São Paulo",
+   "lat": -23.49101,
+   "lon": -46.6188
+  },
+  {
+   "name": "Jardim São Pedro",
+   "lat": -23.72189,
+   "lon": -46.79721
+  },
+  {
+   "name": "Jardim São Raimundo",
+   "lat": -23.58314,
+   "lon": -46.38131
+  },
+  {
+   "name": "Jardim São Roberto",
+   "lat": -23.61811,
+   "lon": -46.49873
+  },
+  {
+   "name": "Jardim Sapopemba",
+   "lat": -23.60949,
+   "lon": -46.49274
+  },
+  {
+   "name": "Jardim Shangrila",
+   "lat": -23.75984,
+   "lon": -46.66761
+  },
+  {
+   "name": "Jardim Silva Teles",
+   "lat": -23.50119,
+   "lon": -46.40793
+  },
+  {
+   "name": "Jardim Silveira",
+   "lat": -23.852,
+   "lon": -46.71308
+  },
+  {
+   "name": "Jardim Soares",
+   "lat": -23.54914,
+   "lon": -46.40218
+  },
+  {
+   "name": "Jardim Texas",
+   "lat": -23.59811,
+   "lon": -46.40777
+  },
+  {
+   "name": "Jardim Três Corações",
+   "lat": -23.76957,
+   "lon": -46.68336
+  },
+  {
+   "name": "Jardim Três Marias",
+   "lat": -23.51838,
+   "lon": -46.49399
+  },
+  {
+   "name": "Jardim Tres Poderes",
+   "lat": -23.59225,
+   "lon": -46.3837
+  },
+  {
+   "name": "Jardim Triana",
+   "lat": -23.53611,
+   "lon": -46.50588
+  },
+  {
+   "name": "Jardim Varginha",
+   "lat": -23.78556,
+   "lon": -46.68458
+  },
+  {
+   "name": "Jardim Vera Cruz",
+   "lat": -23.7371,
+   "lon": -46.77848
+  },
+  {
+   "name": "Jardim Vila Carrão",
+   "lat": -23.61831,
+   "lon": -46.45453
+  },
+  {
+   "name": "Jardim Vila Mariana",
+   "lat": -23.59238,
+   "lon": -46.62616
+  },
+  {
+   "name": "Jardim Vilas Boas",
+   "lat": -23.67595,
+   "lon": -46.63993
+  },
+  {
+   "name": "Jardim Vista Alegre",
+   "lat": -23.57195,
+   "lon": -46.38835
+  },
+  {
+   "name": "Jardim Vitória",
+   "lat": -23.58917,
+   "lon": -46.38704
+  },
+  {
+   "name": "Jardim Wilma Flôr",
+   "lat": -23.57546,
+   "lon": -46.39629
+  },
+  {
+   "name": "Jardins",
+   "lat": -23.57381,
+   "lon": -46.66783
+  },
+  {
+   "name": "Jerusalem",
+   "lat": -23.66486,
+   "lon": -46.7608
+  },
+  {
+   "name": "José Bonifácio",
+   "lat": -23.55833,
+   "lon": -46.43809
+  },
+  {
+   "name": "Lagoa Grande",
+   "lat": -23.84495,
+   "lon": -46.77711
+  },
+  {
+   "name": "Lajeado",
+   "lat": -23.53488,
+   "lon": -46.40889
+  },
+  {
+   "name": "Lapa",
+   "lat": -23.52158,
+   "lon": -46.70435
+  },
+  {
+   "name": "Lauzane Paulista",
+   "lat": -23.47136,
+   "lon": -46.64454
+  },
+  {
+   "name": "Liberdade",
+   "lat": -23.56645,
+   "lon": -46.63136
+  },
+  {
+   "name": "Limão",
+   "lat": -23.50331,
+   "lon": -46.67527
+  },
+  {
+   "name": "Limoeiro",
+   "lat": -23.50935,
+   "lon": -46.466
+  },
+  {
+   "name": "Loteamento Rio Bahia",
+   "lat": -23.5766,
+   "lon": -46.38643
+  },
+  {
+   "name": "Loteamento São Pedro",
+   "lat": -23.56431,
+   "lon": -46.3877
+  },
+  {
+   "name": "Mandaqui",
+   "lat": -23.46369,
+   "lon": -46.64161
+  },
+  {
+   "name": "Marsilac",
+   "lat": -23.90839,
+   "lon": -46.70611
+  },
+  {
+   "name": "Mata da Juta",
+   "lat": -23.61699,
+   "lon": -46.49018
+  },
+  {
+   "name": "Mirandópolis",
+   "lat": -23.60831,
+   "lon": -46.64245
+  },
+  {
+   "name": "Moema",
+   "lat": -23.59708,
+   "lon": -46.66289
+  },
+  {
+   "name": "Mooca",
+   "lat": -23.56068,
+   "lon": -46.59719
+  },
+  {
+   "name": "Morro do Índio",
+   "lat": -23.68921,
+   "lon": -46.77674
+  },
+  {
+   "name": "Morro Doce",
+   "lat": -23.44599,
+   "lon": -46.79587
+  },
+  {
+   "name": "Morro dos Ingleses",
+   "lat": -23.56156,
+   "lon": -46.64739
+  },
+  {
+   "name": "Morumbi",
+   "lat": -23.59743,
+   "lon": -46.70677
+  },
+  {
+   "name": "Nova América",
+   "lat": -23.86517,
+   "lon": -46.67426
+  },
+  {
+   "name": "Nova Heliópolis",
+   "lat": -23.6126,
+   "lon": -46.59101
+  },
+  {
+   "name": "Pacaembu",
+   "lat": -23.54839,
+   "lon": -46.66787
+  },
+  {
+   "name": "Parada de Taípas",
+   "lat": -23.43529,
+   "lon": -46.71696
+  },
+  {
+   "name": "Parada Inglesa",
+   "lat": -23.48619,
+   "lon": -46.60911
+  },
+  {
+   "name": "Parada XV de Novembro",
+   "lat": -23.53028,
+   "lon": -46.43441
+  },
+  {
+   "name": "Paraíso",
+   "lat": -23.57384,
+   "lon": -46.64825
+  },
+  {
+   "name": "Paraisópolis",
+   "lat": -23.6153,
+   "lon": -46.72575
+  },
+  {
+   "name": "Parelheiros",
+   "lat": -23.82731,
+   "lon": -46.72779
+  },
+  {
+   "name": "Pari",
+   "lat": -23.53298,
+   "lon": -46.61585
+  },
+  {
+   "name": "Parque Boa Esperança",
+   "lat": -23.60151,
+   "lon": -46.45403
+  },
+  {
+   "name": "Parque Boturussu",
+   "lat": -23.49866,
+   "lon": -46.48388
+  },
+  {
+   "name": "Parque Brasil",
+   "lat": -23.73609,
+   "lon": -46.69334
+  },
+  {
+   "name": "Parque Central Guaianases",
+   "lat": -23.5449,
+   "lon": -46.42263
+  },
+  {
+   "name": "Parque Colonial",
+   "lat": -23.72635,
+   "lon": -46.68414
+  },
+  {
+   "name": "Parque Continental",
+   "lat": -23.54455,
+   "lon": -46.75821
+  },
+  {
+   "name": "Parque da Mooca",
+   "lat": -23.57051,
+   "lon": -46.58691
+  },
+  {
+   "name": "Parque das Nações Unidas",
+   "lat": -23.72862,
+   "lon": -46.69058
+  },
+  {
+   "name": "Parque das Paineiras",
+   "lat": -23.5372,
+   "lon": -46.47932
+  },
+  {
+   "name": "Parque do Carmo",
+   "lat": -23.57871,
+   "lon": -46.45806
+  },
+  {
+   "name": "Parque dos Príncipes",
+   "lat": -23.57567,
+   "lon": -46.77097
+  },
+  {
+   "name": "Parque Edu Chaves",
+   "lat": -23.47574,
+   "lon": -46.5668
+  },
+  {
+   "name": "Parque Fernanda",
+   "lat": -23.67671,
+   "lon": -46.79397
+  },
+  {
+   "name": "Parque Fongaro",
+   "lat": -23.63355,
+   "lon": -46.59419
+  },
+  {
+   "name": "Parque Guarani",
+   "lat": -23.51816,
+   "lon": -46.46299
+  },
+  {
+   "name": "Parque Imperial",
+   "lat": -23.62208,
+   "lon": -46.63521
+  },
+  {
+   "name": "Parque Independência",
+   "lat": -23.68709,
+   "lon": -46.78657
+  },
+  {
+   "name": "Parque Industrial São Lourenço",
+   "lat": -23.60408,
+   "lon": -46.46538
+  },
+  {
+   "name": "Parque Ipê",
+   "lat": -23.59577,
+   "lon": -46.79717
+  },
+  {
+   "name": "Parque Jabaquara",
+   "lat": -23.63873,
+   "lon": -46.65684
+  },
+  {
+   "name": "Parque Mandaqui",
+   "lat": -23.4664,
+   "lon": -46.63342
+  },
+  {
+   "name": "Parque Maria Domitila",
+   "lat": -23.49124,
+   "lon": -46.73988
+  },
+  {
+   "name": "Parque Monteiro Soares",
+   "lat": -23.49048,
+   "lon": -46.68771
+  },
+  {
+   "name": "Parque Nações Unidas",
+   "lat": -23.44634,
+   "lon": -46.73757
+  },
+  {
+   "name": "Parque Novo Mundo",
+   "lat": -23.51449,
+   "lon": -46.56846
+  },
+  {
+   "name": "Parque Novo Santo Amaro",
+   "lat": -23.69883,
+   "lon": -46.78303
+  },
+  {
+   "name": "Parque Palmas do Tremembé",
+   "lat": -23.46057,
+   "lon": -46.60751
+  },
+  {
+   "name": "Parque Residencial Cocaia Cantinho do Céu",
+   "lat": -23.7446,
+   "lon": -46.65926
+  },
+  {
+   "name": "Parque Santa Rita",
+   "lat": -23.51581,
+   "lon": -46.4175
+  },
+  {
+   "name": "Parque São Domingos",
+   "lat": -23.49952,
+   "lon": -46.73805
+  },
+  {
+   "name": "Parque São Jorge",
+   "lat": -23.52997,
+   "lon": -46.56607
+  },
+  {
+   "name": "Parque Savoy City",
+   "lat": -23.56327,
+   "lon": -46.48948
+  },
+  {
+   "name": "Parque Taipas",
+   "lat": -23.42852,
+   "lon": -46.7137
+  },
+  {
+   "name": "Parque Vitória",
+   "lat": -23.47131,
+   "lon": -46.59471
+  },
+  {
+   "name": "Pedreira",
+   "lat": -23.70794,
+   "lon": -46.65191
+  },
+  {
+   "name": "Penha",
+   "lat": -23.52368,
+   "lon": -46.54378
+  },
+  {
+   "name": "Perdizes",
+   "lat": -23.53999,
+   "lon": -46.67098
+  },
+  {
+   "name": "Perus",
+   "lat": -23.40753,
+   "lon": -46.75206
+  },
+  {
+   "name": "Pinheiros",
+   "lat": -23.56357,
+   "lon": -46.6857
+  },
+  {
+   "name": "Piqueri",
+   "lat": -23.49996,
+   "lon": -46.71238
+  },
+  {
+   "name": "Pirituba",
+   "lat": -23.48553,
+   "lon": -46.72194
+  },
+  {
+   "name": "Planalto Paulista",
+   "lat": -23.61683,
+   "lon": -46.64823
+  },
+  {
+   "name": "Pompéia",
+   "lat": -23.53056,
+   "lon": -46.68498
+  },
+  {
+   "name": "Ponte Rasa",
+   "lat": -23.51105,
+   "lon": -46.48705
+  },
+  {
+   "name": "Raposo Tavares",
+   "lat": -23.59099,
+   "lon": -46.7852
+  },
+  {
+   "name": "Recanto Campo Belo",
+   "lat": -23.79196,
+   "lon": -46.73269
+  },
+  {
+   "name": "República",
+   "lat": -23.54372,
+   "lon": -46.64098
+  },
+  {
+   "name": "Residencial Vista Verde",
+   "lat": -23.4743,
+   "lon": -46.7523
+  },
+  {
+   "name": "Rio Pequeno",
+   "lat": -23.57089,
+   "lon": -46.75866
+  },
+  {
+   "name": "Sacomã",
+   "lat": -23.61151,
+   "lon": -46.59695
+  },
+  {
+   "name": "Santa Cecília",
+   "lat": -23.53795,
+   "lon": -46.65736
+  },
+  {
+   "name": "Santa Ifigênia",
+   "lat": -23.53762,
+   "lon": -46.63918
+  },
+  {
+   "name": "Santa Margarida Paulista",
+   "lat": -23.5181,
+   "lon": -46.39891
+  },
+  {
+   "name": "Santa Teresinha",
+   "lat": -23.49058,
+   "lon": -46.63431
+  },
+  {
+   "name": "Santana",
+   "lat": -23.50212,
+   "lon": -46.62702
+  },
+  {
+   "name": "Santo Amaro",
+   "lat": -23.64056,
+   "lon": -46.70072
+  },
+  {
+   "name": "São Domingos",
+   "lat": -23.49388,
+   "lon": -46.74219
+  },
+  {
+   "name": "São João Climaco",
+   "lat": -23.62427,
+   "lon": -46.59415
+  },
+  {
+   "name": "São Judas",
+   "lat": -23.62538,
+   "lon": -46.63567
+  },
+  {
+   "name": "São Lucas",
+   "lat": -23.59533,
+   "lon": -46.54759
+  },
+  {
+   "name": "São Mateus",
+   "lat": -23.5983,
+   "lon": -46.4817
+  },
+  {
+   "name": "São Miguel",
+   "lat": -23.49488,
+   "lon": -46.43908
+  },
+  {
+   "name": "São Rafael",
+   "lat": -23.62709,
+   "lon": -46.4554
+  },
+  {
+   "name": "Sapopemba",
+   "lat": -23.60433,
+   "lon": -46.50989
+  },
+  {
+   "name": "Saúde",
+   "lat": -23.61866,
+   "lon": -46.63666
+  },
+  {
+   "name": "Sé",
+   "lat": -23.54881,
+   "lon": -46.63177
+  },
+  {
+   "name": "Sítio dos Pereiras",
+   "lat": -23.58353,
+   "lon": -46.38505
+  },
+  {
+   "name": "Sítio Santa Etelvina",
+   "lat": -23.58659,
+   "lon": -46.41178
+  },
+  {
+   "name": "Socorro",
+   "lat": -23.68403,
+   "lon": -46.70925
+  },
+  {
+   "name": "Sumaré",
+   "lat": -23.54538,
+   "lon": -46.68117
+  },
+  {
+   "name": "Sumarezinho",
+   "lat": -23.54711,
+   "lon": -46.69215
+  },
+  {
+   "name": "Tatuapé",
+   "lat": -23.54089,
+   "lon": -46.57501
+  },
+  {
+   "name": "Tremembé",
+   "lat": -23.44829,
+   "lon": -46.60298
+  },
+  {
+   "name": "Tucuruvi",
+   "lat": -23.48062,
+   "lon": -46.60526
+  },
+  {
+   "name": "União de Vila Nova",
+   "lat": -23.48441,
+   "lon": -46.45858
+  },
+  {
+   "name": "Valquiria",
+   "lat": -23.65445,
+   "lon": -46.77876
+  },
+  {
+   "name": "Vargem Grande",
+   "lat": -23.86057,
+   "lon": -46.70763
+  },
+  {
+   "name": "Vila Albertina",
+   "lat": -23.45206,
+   "lon": -46.61131
+  },
+  {
+   "name": "Vila Alexandria",
+   "lat": -23.64187,
+   "lon": -46.67143
+  },
+  {
+   "name": "Vila Alpina",
+   "lat": -23.59586,
+   "lon": -46.55893
+  },
+  {
+   "name": "Vila Alto da Alegria",
+   "lat": -23.74482,
+   "lon": -46.6928
+  },
+  {
+   "name": "Vila Amélia",
+   "lat": -23.4713,
+   "lon": -46.65289
+  },
+  {
+   "name": "Vila Anastácio",
+   "lat": -23.51552,
+   "lon": -46.71825
+  },
+  {
+   "name": "Vila Andrade",
+   "lat": -23.62569,
+   "lon": -46.72699
+  },
+  {
+   "name": "Vila Anglo-Brasileira",
+   "lat": -23.54008,
+   "lon": -46.69492
+  },
+  {
+   "name": "Vila Arapuã",
+   "lat": -23.63509,
+   "lon": -46.59063
+  },
+  {
+   "name": "Vila Argentina",
+   "lat": -23.53751,
+   "lon": -46.70488
+  },
+  {
+   "name": "Vila Aricanduva",
+   "lat": -23.5363,
+   "lon": -46.54158
+  },
+  {
+   "name": "Vila Arriete",
+   "lat": -23.68215,
+   "lon": -46.68244
+  },
+  {
+   "name": "Vila Aurora",
+   "lat": -23.47423,
+   "lon": -46.6256
+  },
+  {
+   "name": "Vila Aymoré",
+   "lat": -23.48767,
+   "lon": -46.40139
+  },
+  {
+   "name": "Vila Azevedo",
+   "lat": -23.54269,
+   "lon": -46.57136
+  },
+  {
+   "name": "Vila Bancária",
+   "lat": -23.58959,
+   "lon": -46.523
+  },
+  {
+   "name": "Vila Bandeirantes",
+   "lat": -23.61508,
+   "lon": -46.60052
+  },
+  {
+   "name": "Vila Beatriz",
+   "lat": -23.54997,
+   "lon": -46.69778
+  },
+  {
+   "name": "Vila BNH Leste",
+   "lat": -23.76024,
+   "lon": -46.67403
+  },
+  {
+   "name": "Vila Brasilândia",
+   "lat": -23.47593,
+   "lon": -46.70541
+  },
+  {
+   "name": "Vila Buarque",
+   "lat": -23.54456,
+   "lon": -46.64755
+  },
+  {
+   "name": "Vila Buenos Aires",
+   "lat": -23.50916,
+   "lon": -46.51474
+  },
+  {
+   "name": "Vila Caiuba",
+   "lat": -23.39966,
+   "lon": -46.74974
+  },
+  {
+   "name": "Vila Campanela São Paulo",
+   "lat": -23.53739,
+   "lon": -46.46208
+  },
+  {
+   "name": "Vila Campestre",
+   "lat": -23.65969,
+   "lon": -46.64843
+  },
+  {
+   "name": "Vila Cardoso Franco",
+   "lat": -23.62507,
+   "lon": -46.50617
+  },
+  {
+   "name": "Vila Carlo Maderna",
+   "lat": -23.56335,
+   "lon": -46.4816
+  },
+  {
+   "name": "Vila Carmosina",
+   "lat": -23.54037,
+   "lon": -46.45417
+  },
+  {
+   "name": "Vila Chavantes",
+   "lat": -23.51474,
+   "lon": -46.44227
+  },
+  {
+   "name": "Vila Cirenaica",
+   "lat": -23.67617,
+   "lon": -46.63122
+  },
+  {
+   "name": "Vila Clara",
+   "lat": -23.67301,
+   "lon": -46.63962
+  },
+  {
+   "name": "Vila Clarice",
+   "lat": -23.46875,
+   "lon": -46.75059
+  },
+  {
+   "name": "Vila Clementino",
+   "lat": -23.59801,
+   "lon": -46.64342
+  },
+  {
+   "name": "Vila Conde do Pinhal",
+   "lat": -23.61805,
+   "lon": -46.5938
+  },
+  {
+   "name": "Vila Córrego da Água Vermelha",
+   "lat": -23.51703,
+   "lon": -46.41703
+  },
+  {
+   "name": "VIla Cosmopolita",
+   "lat": -23.56102,
+   "lon": -46.42269
+  },
+  {
+   "name": "Vila Costa Melo",
+   "lat": -23.5154,
+   "lon": -46.51407
+  },
+  {
+   "name": "Vila Cristina",
+   "lat": -23.65279,
+   "lon": -46.60538
+  },
+  {
+   "name": "Vila Cunha Bueno",
+   "lat": -23.60374,
+   "lon": -46.51417
+  },
+  {
+   "name": "Vila Curuçá",
+   "lat": -23.50271,
+   "lon": -46.42405
+  },
+  {
+   "name": "Vila Dalila",
+   "lat": -23.5464,
+   "lon": -46.52035
+  },
+  {
+   "name": "Vila das Mercês",
+   "lat": -23.62316,
+   "lon": -46.60853
+  },
+  {
+   "name": "Vila Dersa",
+   "lat": -23.66854,
+   "lon": -46.63344
+  },
+  {
+   "name": "Vila do Bosque",
+   "lat": -23.6204,
+   "lon": -46.62992
+  },
+  {
+   "name": "Vila do Encontro",
+   "lat": -23.65159,
+   "lon": -46.63993
+  },
+  {
+   "name": "Vila do Sol",
+   "lat": -23.73589,
+   "lon": -46.7829
+  },
+  {
+   "name": "Vila Dom Macário",
+   "lat": -23.61953,
+   "lon": -46.61327
+  },
+  {
+   "name": "Vila Dom Pedro I",
+   "lat": -23.60193,
+   "lon": -46.61366
+  },
+  {
+   "name": "Vila Dona Graça",
+   "lat": -23.59808,
+   "lon": -46.42955
+  },
+  {
+   "name": "Vila Ede",
+   "lat": -23.49366,
+   "lon": -46.59339
+  },
+  {
+   "name": "Vila Esperança",
+   "lat": -23.52559,
+   "lon": -46.52772
+  },
+  {
+   "name": "Vila Eugênia",
+   "lat": -23.59508,
+   "lon": -46.45329
+  },
+  {
+   "name": "Vila Fernandes",
+   "lat": -23.56007,
+   "lon": -46.53201
+  },
+  {
+   "name": "Vila Firmiano Pinto",
+   "lat": -23.5989,
+   "lon": -46.61942
+  },
+  {
+   "name": "Vila Formosa",
+   "lat": -23.56688,
+   "lon": -46.54632
+  },
+  {
+   "name": "Vila Frugoli",
+   "lat": -23.51873,
+   "lon": -46.50076
+  },
+  {
+   "name": "Vila Galpozani",
+   "lat": -23.64933,
+   "lon": -46.77517
+  },
+  {
+   "name": "Vila Géa",
+   "lat": -23.67415,
+   "lon": -46.68758
+  },
+  {
+   "name": "Vila Gilda",
+   "lat": -23.72491,
+   "lon": -46.7535
+  },
+  {
+   "name": "Vila Gomes Cardim",
+   "lat": -23.54515,
+   "lon": -46.5617
+  },
+  {
+   "name": "Vila Granada",
+   "lat": -23.52351,
+   "lon": -46.5143
+  },
+  {
+   "name": "Vila Grão Mogol",
+   "lat": -23.48999,
+   "lon": -46.40438
+  },
+  {
+   "name": "Vila Gruta das Princesas",
+   "lat": -23.48274,
+   "lon": -46.39417
+  },
+  {
+   "name": "Vila Guaraciaba",
+   "lat": -23.48441,
+   "lon": -46.49708
+  },
+  {
+   "name": "Vila Guarani",
+   "lat": -23.63661,
+   "lon": -46.63668
+  },
+  {
+   "name": "Vila Guilherme",
+   "lat": -23.5171,
+   "lon": -46.60796
+  },
+  {
+   "name": "Vila Guilhermina",
+   "lat": -23.53339,
+   "lon": -46.51534
+  },
+  {
+   "name": "Vila Gumercindo",
+   "lat": -23.60467,
+   "lon": -46.62095
+  },
+  {
+   "name": "Vila Gustavo",
+   "lat": -23.48071,
+   "lon": -46.59582
+  },
+  {
+   "name": "Vila Hamburguesa",
+   "lat": -23.53346,
+   "lon": -46.72626
+  },
+  {
+   "name": "Vila Ida",
+   "lat": -23.5431,
+   "lon": -46.70742
+  },
+  {
+   "name": "Vila Império",
+   "lat": -23.67038,
+   "lon": -46.65115
+  },
+  {
+   "name": "Vila Independência",
+   "lat": -23.59736,
+   "lon": -46.59346
+  },
+  {
+   "name": "Vila Ipojuca",
+   "lat": -23.53352,
+   "lon": -46.70847
+  },
+  {
+   "name": "Vila Isolina Mazzei",
+   "lat": -23.49304,
+   "lon": -46.60382
+  },
+  {
+   "name": "Vila Itaim",
+   "lat": -23.49139,
+   "lon": -46.40076
+  },
+  {
+   "name": "Vila Jacuí",
+   "lat": -23.50511,
+   "lon": -46.45195
+  },
+  {
+   "name": "Vila Jaguara",
+   "lat": -23.50761,
+   "lon": -46.75498
+  },
+  {
+   "name": "Vila Jaraguá",
+   "lat": -23.48397,
+   "lon": -46.76497
+  },
+  {
+   "name": "Vila Jardim Maia",
+   "lat": -23.48307,
+   "lon": -46.41605
+  },
+  {
+   "name": "Vila Jardim Maristela",
+   "lat": -23.48731,
+   "lon": -46.75435
+  },
+  {
+   "name": "Vila Jardim Morro Oriente",
+   "lat": -23.63619,
+   "lon": -46.75913
+  },
+  {
+   "name": "Vila Jardim Olinda",
+   "lat": -23.63113,
+   "lon": -46.75595
+  },
+  {
+   "name": "Vila Jardim Paris",
+   "lat": -23.63834,
+   "lon": -46.77131
+  },
+  {
+   "name": "Vila Jardim Planalto",
+   "lat": -23.61178,
+   "lon": -46.51856
+  },
+  {
+   "name": "Vila Jardim São Matinho",
+   "lat": -23.48317,
+   "lon": -46.41343
+  },
+  {
+   "name": "Vila Jardim Umuarama",
+   "lat": -23.64694,
+   "lon": -46.76881
+  },
+  {
+   "name": "Vila Joaquim Meira",
+   "lat": -23.5753,
+   "lon": -46.48702
+  },
+  {
+   "name": "Vila Laís",
+   "lat": -23.51796,
+   "lon": -46.54188
+  },
+  {
+   "name": "Vila Leônidas Moreira",
+   "lat": -23.64325,
+   "lon": -46.77816
+  },
+  {
+   "name": "Vila Leopoldina",
+   "lat": -23.5275,
+   "lon": -46.73295
+  },
+  {
+   "name": "Vila Liviero",
+   "lat": -23.64455,
+   "lon": -46.59357
+  },
+  {
+   "name": "Vila Machado Nunes",
+   "lat": -23.5786,
+   "lon": -46.48533
+  },
+  {
+   "name": "Vila Madalena",
+   "lat": -23.5555,
+   "lon": -46.69119
+  },
+  {
+   "name": "Vila Marcelo",
+   "lat": -23.79087,
+   "lon": -46.72386
+  },
+  {
+   "name": "Vila Margarida",
+   "lat": -23.4824,
+   "lon": -46.39003
+  },
+  {
+   "name": "Vila Maria",
+   "lat": -23.51318,
+   "lon": -46.58916
+  },
+  {
+   "name": "Vila Maria Eugênia",
+   "lat": -23.49163,
+   "lon": -46.75277
+  },
+  {
+   "name": "Vila Mariana",
+   "lat": -23.59254,
+   "lon": -46.63571
+  },
+  {
+   "name": "Vila Marieta",
+   "lat": -23.51639,
+   "lon": -46.52316
+  },
+  {
+   "name": "Vila Marilena",
+   "lat": -23.55571,
+   "lon": -46.41517
+  },
+  {
+   "name": "Vila Marisa",
+   "lat": -23.50849,
+   "lon": -46.76026
+  },
+  {
+   "name": "Vila Mascote",
+   "lat": -23.64592,
+   "lon": -46.66756
+  },
+  {
+   "name": "Vila Matilde",
+   "lat": -23.53618,
+   "lon": -46.52461
+  },
+  {
+   "name": "Vila Mazzei",
+   "lat": -23.47296,
+   "lon": -46.60082
+  },
+  {
+   "name": "Vila Medeiros",
+   "lat": -23.48771,
+   "lon": -46.5845
+  },
+  {
+   "name": "Vila Mirante",
+   "lat": -23.46908,
+   "lon": -46.722
+  },
+  {
+   "name": "Vila Missionária",
+   "lat": -23.64704,
+   "lon": -46.77116
+  },
+  {
+   "name": "Vila Moinho Velho",
+   "lat": -23.61203,
+   "lon": -46.6033
+  },
+  {
+   "name": "Vila Monforte de Lemos",
+   "lat": -23.64843,
+   "lon": -46.77157
+  },
+  {
+   "name": "Vila Monte Alegre",
+   "lat": -23.6276,
+   "lon": -46.63524
+  },
+  {
+   "name": "Vila Monumento",
+   "lat": -23.57642,
+   "lon": -46.61378
+  },
+  {
+   "name": "Vila Morada do Sol",
+   "lat": -23.57121,
+   "lon": -46.49275
+  },
+  {
+   "name": "Vila Munhoz",
+   "lat": -23.49875,
+   "lon": -46.58864
+  },
+  {
+   "name": "Vila Natalia",
+   "lat": -23.62713,
+   "lon": -46.59631
+  },
+  {
+   "name": "Vila Nhocuné",
+   "lat": -23.54388,
+   "lon": -46.49672
+  },
+  {
+   "name": "Vila Nilo",
+   "lat": -23.46017,
+   "lon": -46.57445
+  },
+  {
+   "name": "Vila Nova",
+   "lat": -23.63871,
+   "lon": -46.77101
+  },
+  {
+   "name": "Vila Nova Curuça",
+   "lat": -23.51712,
+   "lon": -46.41919
+  },
+  {
+   "name": "Vila Nova Jaguaré",
+   "lat": -23.54494,
+   "lon": -46.74271
+  },
+  {
+   "name": "Vila Odete",
+   "lat": -23.53503,
+   "lon": -46.40999
+  },
+  {
+   "name": "Vila Olímpia",
+   "lat": -23.59404,
+   "lon": -46.68423
+  },
+  {
+   "name": "Vila Operária Maria Zélia",
+   "lat": -23.53299,
+   "lon": -46.59809
+  },
+  {
+   "name": "Vila Pantanal",
+   "lat": -23.47487,
+   "lon": -46.41783
+  },
+  {
+   "name": "Vila Pantanal 2",
+   "lat": -23.48455,
+   "lon": -46.45179
+  },
+  {
+   "name": "Vila Parque Guaianases",
+   "lat": -23.52148,
+   "lon": -46.41559
+  },
+  {
+   "name": "Vila Patrimonial",
+   "lat": -23.67602,
+   "lon": -46.63799
+  },
+  {
+   "name": "Vila Paulicéia",
+   "lat": -23.48827,
+   "lon": -46.61468
+  },
+  {
+   "name": "Vila Paulista",
+   "lat": -23.57722,
+   "lon": -46.4064
+  },
+  {
+   "name": "Vila Penteado",
+   "lat": -23.47043,
+   "lon": -46.68726
+  },
+  {
+   "name": "Vila Pereira Barreto",
+   "lat": -23.48954,
+   "lon": -46.71855
+  },
+  {
+   "name": "Vila Pereira Cerca",
+   "lat": -23.49499,
+   "lon": -46.71261
+  },
+  {
+   "name": "Vila Piratininga",
+   "lat": -23.50333,
+   "lon": -46.53745
+  },
+  {
+   "name": "Vila Pirituba",
+   "lat": -23.48212,
+   "lon": -46.74626
+  },
+  {
+   "name": "VIla Prado",
+   "lat": -23.49371,
+   "lon": -46.67547
+  },
+  {
+   "name": "Vila Princesa Isabel",
+   "lat": -23.54713,
+   "lon": -46.41678
+  },
+  {
+   "name": "Vila Professora Nina Stocco",
+   "lat": -23.62837,
+   "lon": -46.76091
+  },
+  {
+   "name": "Vila Progresso",
+   "lat": -23.51751,
+   "lon": -46.43243
+  },
+  {
+   "name": "Vila Prudente",
+   "lat": -23.59152,
+   "lon": -46.57265
+  },
+  {
+   "name": "Vila Ré",
+   "lat": -23.52838,
+   "lon": -46.49784
+  },
+  {
+   "name": "Vila Recanto da Moeda",
+   "lat": -23.6743,
+   "lon": -46.63308
+  },
+  {
+   "name": "Vila Regina",
+   "lat": -23.63815,
+   "lon": -46.76013
+  },
+  {
+   "name": "Vila Renato",
+   "lat": -23.4725,
+   "lon": -46.71914
+  },
+  {
+   "name": "Vila Rio Branco",
+   "lat": -23.51194,
+   "lon": -46.49489
+  },
+  {
+   "name": "Vila Rio Fartura",
+   "lat": -23.55764,
+   "lon": -46.41152
+  },
+  {
+   "name": "Vila Rizieri",
+   "lat": -23.6342,
+   "lon": -46.59172
+  },
+  {
+   "name": "Vila Roland Berigan",
+   "lat": -23.48523,
+   "lon": -46.44085
+  },
+  {
+   "name": "Vila Romana",
+   "lat": -23.52877,
+   "lon": -46.70374
+  },
+  {
+   "name": "Vila Rosa",
+   "lat": -23.45893,
+   "lon": -46.63006
+  },
+  {
+   "name": "Vila Rosária",
+   "lat": -23.50235,
+   "lon": -46.43436
+  },
+  {
+   "name": "Vila Roschel",
+   "lat": -23.83926,
+   "lon": -46.73378
+  },
+  {
+   "name": "Vila Roseira 1",
+   "lat": -23.56209,
+   "lon": -46.39379
+  },
+  {
+   "name": "VIla Roseira 2",
+   "lat": -23.55934,
+   "lon": -46.3923
+  },
+  {
+   "name": "Vila Rua Itaguara",
+   "lat": -23.65128,
+   "lon": -46.63439
+  },
+  {
+   "name": "Vila Sá Barbosa",
+   "lat": -23.53102,
+   "lon": -46.62718
+  },
+  {
+   "name": "Vila Sabrina",
+   "lat": -23.4912,
+   "lon": -46.57666
+  },
+  {
+   "name": "Vila Safira",
+   "lat": -23.47531,
+   "lon": -46.41251
+  },
+  {
+   "name": "Vila Santa Catarina",
+   "lat": -23.65168,
+   "lon": -46.65696
+  },
+  {
+   "name": "Vila Santa Lúcia",
+   "lat": -23.68911,
+   "lon": -46.76406
+  },
+  {
+   "name": "Vila Santa Tereza",
+   "lat": -23.53872,
+   "lon": -46.49271
+  },
+  {
+   "name": "Vila Santo Antônio",
+   "lat": -23.55155,
+   "lon": -46.41776
+  },
+  {
+   "name": "Vila Santo Estéfano",
+   "lat": -23.6235,
+   "lon": -46.62425
+  },
+  {
+   "name": "Vila São Francisco",
+   "lat": -23.51831,
+   "lon": -46.49091
+  },
+  {
+   "name": "Vila São José",
+   "lat": -23.74051,
+   "lon": -46.70857
+  },
+  {
+   "name": "Vila São Paulo",
+   "lat": -23.65716,
+   "lon": -46.67022
+  },
+  {
+   "name": "Vila São Pedro",
+   "lat": -23.65234,
+   "lon": -46.59689
+  },
+  {
+   "name": "Vila Sebastião Afonso",
+   "lat": -23.67749,
+   "lon": -46.63403
+  },
+  {
+   "name": "Vila Simone",
+   "lat": -23.50347,
+   "lon": -46.40028
+  },
+  {
+   "name": "Vila Sônia",
+   "lat": -23.59866,
+   "lon": -46.73929
+  },
+  {
+   "name": "Vila Souza",
+   "lat": -23.43432,
+   "lon": -46.71652
+  },
+  {
+   "name": "Vila Tolstói",
+   "lat": -23.59914,
+   "lon": -46.5249
+  },
+  {
+   "name": "Vila Vaquejada",
+   "lat": -23.57578,
+   "lon": -46.38963
+  },
+  {
+   "name": "Vila Yolanda",
+   "lat": -23.53844,
+   "lon": -46.40293
+  },
+  {
+   "name": "Vila Zatt",
+   "lat": -23.47732,
+   "lon": -46.7157
+  }
+ ]
+}

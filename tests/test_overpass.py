@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 import overpass
@@ -59,7 +61,17 @@ def test_bbox_from_nominatim_raises_when_nothing_found():
         overpass.bbox_from_nominatim([])
 
 
-def test_parse_places_drops_places_that_already_have_a_website():
+def test_uf_from_nominatim_reads_the_state_code():
+    results = [{"address": {"state": "São Paulo", "ISO3166-2-lvl4": "BR-SP"}}]
+
+    assert overpass.uf_from_nominatim(results) == "SP"
+
+
+def test_uf_from_nominatim_is_none_without_address_details():
+    assert overpass.uf_from_nominatim([{"boundingbox": ["0", "1", "0", "1"]}]) is None
+
+
+def test_parse_places_keeps_places_that_have_a_website():
     data = {
         "elements": [
             element({"name": "A", "website": "https://a.com"}, element_id=1),
@@ -72,7 +84,117 @@ def test_parse_places_drops_places_that_already_have_a_website():
     result = overpass.parse_places(data, "restaurante", "Pinheiros")
 
     assert result["total"] == 4
-    assert [lead["name"] for lead in result["leads"]] == ["D"]
+    assert [(lead["name"], lead["site_state"]) for lead in result["leads"]] == [
+        ("A", "site_informado"),
+        ("B", "site_informado"),
+        ("C", "site_informado"),
+        ("D", "sem_site_na_fonte"),
+    ]
+    assert result["leads"][1]["website"] == "https://b.com"
+
+
+def parse_one(tags):
+    return overpass.parse_places(
+        {"elements": [element({"name": "Lugar", **tags})]}, "restaurante", "Pinheiros"
+    )["leads"][0]
+
+
+def test_parse_places_normalizes_the_website_and_drops_utm():
+    lead = parse_one({"website": "www.lugar.com.br/?utm_source=osm"})
+
+    assert lead["website"] == "https://www.lugar.com.br/"
+    assert lead["site_state"] == "site_informado"
+
+
+def test_parse_places_treats_an_instagram_website_as_social_only():
+    lead = parse_one({"website": "https://instagram.com/lugar"})
+
+    assert lead["website"] is None
+    assert lead["site_state"] == "so_rede_social"
+    assert lead["instagram"] == "https://instagram.com/lugar"
+    assert lead["score"] == 1
+
+
+def test_parse_places_keeps_the_instagram_tag_over_the_website_field():
+    lead = parse_one(
+        {"contact:instagram": "lugar", "website": "https://instagram.com/outro"}
+    )
+
+    assert lead["instagram"] == "lugar"
+    assert lead["other_links"] == ["https://instagram.com/outro"]
+
+
+def test_parse_places_treats_a_facebook_website_as_social_only():
+    lead = parse_one({"contact:website": "https://m.facebook.com/lugar"})
+
+    assert lead["site_state"] == "so_rede_social"
+    assert lead["facebook"] == "https://m.facebook.com/lugar"
+
+
+@pytest.mark.parametrize(
+    "website",
+    ["https://linktr.ee/lugar", "https://www.ifood.com.br/delivery/lugar", "https://wa.me/5511988887777"],
+)
+def test_parse_places_treats_link_pages_and_delivery_as_not_own_site(website):
+    lead = parse_one({"website": website})
+
+    assert lead["website"] is None
+    assert lead["site_state"] == "so_rede_social"
+    assert lead["other_links"] == [website]
+
+
+def test_parse_places_ignores_an_invalid_website():
+    lead = parse_one({"website": "não tem"})
+
+    assert lead["website"] is None
+    assert lead["site_state"] == "sem_site_na_fonte"
+
+
+def test_parse_places_collects_email_facebook_and_other_links():
+    lead = parse_one(
+        {
+            "email": "oi@lugar.com.br",
+            "contact:facebook": "https://facebook.com/lugar",
+            "contact:tiktok": "https://tiktok.com/@lugar",
+            "contact:youtube": "https://youtube.com/@lugar",
+        }
+    )
+
+    assert lead["email"] == "oi@lugar.com.br"
+    assert lead["facebook"] == "https://facebook.com/lugar"
+    assert lead["other_links"] == ["https://tiktok.com/@lugar", "https://youtube.com/@lugar"]
+    assert lead["site_state"] == "sem_site_na_fonte"
+
+
+def test_parse_places_takes_city_and_uf_from_the_address():
+    lead = overpass.parse_places(
+        {"elements": [element({"name": "Lugar", "addr:city": "Osasco", "addr:state": "SP"})]},
+        "restaurante",
+        "Pinheiros",
+        "São Paulo",
+        "RJ",
+    )["leads"][0]
+
+    assert (lead["city"], lead["uf"]) == ("Osasco", "SP")
+
+
+def test_parse_places_falls_back_to_the_searched_city_and_uf():
+    lead = overpass.parse_places(
+        {"elements": [element({"name": "Lugar", "addr:state": "São Paulo"})]},
+        "restaurante",
+        "Pinheiros",
+        "São Paulo",
+        "SP",
+    )["leads"][0]
+
+    assert (lead["city"], lead["uf"]) == ("São Paulo", "SP")
+
+
+def test_parse_places_normalizes_the_phone():
+    lead = parse_one({"phone": "+55 11 98888-7777"})
+
+    assert lead["phone"] == "+55 11 98888-7777"
+    assert (lead["phone_national"], lead["phone_kind"]) == ("11988887777", "celular")
 
 
 def test_parse_places_ignores_elements_without_a_name():
@@ -103,8 +225,17 @@ def test_parse_places_builds_lead_fields():
         "segment": "restaurante",
         "neighborhood": "Pinheiros",
         "phone": "+55 11 3333-4444",
+        "phone_national": "1133334444",
+        "phone_kind": "fixo",
         "address": "Rua A, 10, Vila B",
+        "city": None,
+        "uf": None,
+        "email": None,
         "instagram": "cantinaboa",
+        "facebook": None,
+        "other_links": [],
+        "website": None,
+        "site_state": "sem_site_na_fonte",
         "lat": -23.56,
         "lon": -46.69,
         "score": 5,
@@ -169,3 +300,97 @@ def test_parse_places_falls_back_to_other_phone_tags():
     )["leads"][0]
 
     assert lead["phone"] == "+55 11 98888-7777"
+
+
+import httpx
+
+NOMINATIM_ANSWER = [
+    {
+        "boundingbox": ["-23.63", "-23.60", "-46.66", "-46.62"],
+        "address": {"ISO3166-2-lvl4": "BR-SP"},
+    }
+]
+OVERPASS_ANSWER = {"elements": [element({"name": "Cantina"})]}
+
+
+def fake_servers(overpass_statuses, nominatim_status=200):
+    calls = {"overpass": 0, "nominatim": 0}
+    waits = []
+
+    def handler(request):
+        if "nominatim" in request.url.host:
+            calls["nominatim"] += 1
+            return httpx.Response(nominatim_status, json=NOMINATIM_ANSWER)
+        status = overpass_statuses[min(calls["overpass"], len(overpass_statuses) - 1)]
+        calls["overpass"] += 1
+        if status == "timeout":
+            raise httpx.ReadTimeout("lento", request=request)
+        return httpx.Response(status, json=OVERPASS_ANSWER if status == 200 else {})
+
+    async def sleep(seconds):
+        waits.append(seconds)
+
+    return calls, waits, httpx.MockTransport(handler), sleep
+
+
+def run_search(transport, sleep):
+    return asyncio.run(
+        overpass.search("restaurante", "Saúde", "São Paulo", transport=transport, sleep=sleep)
+    )
+
+
+@pytest.mark.parametrize("status", [429, 502, 503, 504])
+def test_search_retries_a_busy_overpass_until_it_answers(status):
+    calls, waits, transport, sleep = fake_servers([status, status, 200])
+
+    result = run_search(transport, sleep)
+
+    assert [lead["name"] for lead in result["leads"]] == ["Cantina"]
+    assert calls["overpass"] == 3
+    assert waits == list(overpass.RETRY_WAITS[:2])
+
+
+def test_search_geocodes_only_once_while_retrying():
+    calls, _, transport, sleep = fake_servers([502, 200])
+
+    run_search(transport, sleep)
+
+    assert calls["nominatim"] == 1
+
+
+def test_search_retries_a_timeout():
+    calls, _, transport, sleep = fake_servers(["timeout", 200])
+
+    run_search(transport, sleep)
+
+    assert calls["overpass"] == 2
+
+
+def test_search_gives_up_after_the_last_attempt():
+    calls, waits, transport, sleep = fake_servers([502])
+
+    with pytest.raises(httpx.HTTPStatusError):
+        run_search(transport, sleep)
+
+    assert calls["overpass"] == len(overpass.RETRY_WAITS) + 1
+    assert waits == list(overpass.RETRY_WAITS)
+
+
+@pytest.mark.parametrize("status", [400, 404])
+def test_search_does_not_retry_a_request_error(status):
+    calls, waits, transport, sleep = fake_servers([status])
+
+    with pytest.raises(httpx.HTTPStatusError):
+        run_search(transport, sleep)
+
+    assert calls["overpass"] == 1
+    assert waits == []
+
+
+def test_search_does_not_retry_when_everything_works():
+    calls, waits, transport, sleep = fake_servers([200])
+
+    run_search(transport, sleep)
+
+    assert calls["overpass"] == 1
+    assert waits == []

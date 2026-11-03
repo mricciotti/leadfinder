@@ -3,30 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prospecção</title>
+<title>Leadfinder · Prospecção</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #edf0f2;
-  --ink: #18212b;
-  --muted: #5b6672;
-  --rule: #c5cdd4;
-  --accent: #2438c8;
+  --bg: #f4f5f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --ink: #111827;
+  --muted: #6b7280;
+  --rule: #e5e7eb;
+  --accent: #4f46e5;
+  --accent-soft: #eef2ff;
   --accent-ink: #ffffff;
-  --danger: #b3261e;
+  --side: #0f172a;
+  --side-ink: #94a3b8;
+  --side-strong: #f8fafc;
+  --side-active: #1e293b;
+  --good: #047857;
+  --good-soft: #ecfdf5;
+  --warn: #b45309;
+  --warn-soft: #fffbeb;
+  --bad: #b91c1c;
+  --bad-soft: #fef2f2;
+  --info: #1d4ed8;
+  --info-soft: #eff6ff;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --overlay: rgba(15, 23, 42, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #12171d;
-    --ink: #e8ecf0;
-    --muted: #9aa6b2;
-    --rule: #2a333d;
-    --accent: #8b99ff;
-    --accent-ink: #12171d;
-    --danger: #ff8a80;
+    --bg: #0b0f17;
+    --surface: #121826;
+    --surface-2: #0f1522;
+    --ink: #e5e7eb;
+    --muted: #94a3b8;
+    --rule: #222b3a;
+    --accent: #818cf8;
+    --accent-soft: #1e1b4b;
+    --accent-ink: #0b0f17;
+    --side: #070a10;
+    --side-ink: #8391a7;
+    --side-strong: #f1f5f9;
+    --side-active: #161d2b;
+    --good: #34d399;
+    --good-soft: #06291d;
+    --warn: #fbbf24;
+    --warn-soft: #2b1f06;
+    --bad: #f87171;
+    --bad-soft: #2d0e0e;
+    --info: #60a5fa;
+    --info-soft: #0c1a33;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --overlay: rgba(0, 0, 0, 0.55);
   }
 }
 
@@ -34,224 +66,757 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Bricolage Grotesque", system-ui, sans-serif;
-  line-height: 1.5;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
-.wrap {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 1.25rem 4rem;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
 }
 
-header {
-  padding-top: 1.75rem;
+a {
+  color: var(--accent);
 }
 
-h1 {
-  margin: 0 0 1rem;
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.app {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
 }
 
-form {
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 1.25rem 0.75rem;
+  background: var(--side);
+  color: var(--side-ink);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 0.5rem 1.5rem;
+  color: var(--side-strong);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--side-ink);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav button:hover {
+  color: var(--side-strong);
+}
+
+.nav button[aria-current="page"] {
+  background: var(--side-active);
+  color: var(--side-strong);
+}
+
+.nav svg,
+.icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 0 0.5rem;
+  font-size: 12px;
+}
+
+main {
+  min-width: 0;
+  padding: 1.5rem 2rem 4rem;
+}
+
+.page-head {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-head p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.btn.small {
+  padding: 0.35rem 0.7rem;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.card {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.search {
+  padding: 1rem 1.25rem;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.card-hint {
+  margin: 0.15rem 0 0.9rem;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.search form {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1.4fr) minmax(10rem, 1.2fr) auto;
+  align-items: end;
   gap: 0.75rem;
 }
 
 label {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.3rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 input,
 select,
 textarea {
-  font: inherit;
-  color: var(--ink);
-  background: transparent;
-  border: 1px solid var(--rule);
-  border-radius: 4px;
+  width: 100%;
   padding: 0.55rem 0.7rem;
-}
-
-select option {
-  background: var(--bg);
-  color: var(--ink);
-}
-
-button.primary {
-  font: inherit;
-  font-weight: 600;
-  color: var(--accent-ink);
-  background: var(--accent);
-  border: 0;
-  border-radius: 4px;
-  padding: 0.6rem 1.2rem;
-  cursor: pointer;
-}
-
-button.primary:disabled {
-  opacity: 0.55;
-  cursor: progress;
-}
-
-#message {
-  min-height: 1.5rem;
-  margin: 0.75rem 0 0;
-  color: var(--muted);
-}
-
-#message.error {
-  color: var(--danger);
-}
-
-#filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-#filters select {
-  padding: 0.35rem 0.6rem;
-  font-size: 0.95rem;
-}
-
-#stages {
-  display: flex;
-  gap: 2rem;
-  margin-top: 1rem;
-  border-bottom: 1px solid var(--rule);
-  overflow-x: auto;
-}
-
-#stages button {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  margin-bottom: -1px;
-  padding: 0.75rem 0 0.5rem;
-  font: inherit;
-  color: var(--muted);
-  background: none;
-  border: 0;
-  border-bottom: 3px solid transparent;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-#stages button[aria-pressed="true"] {
-  color: var(--ink);
-  border-bottom-color: var(--accent);
-}
-
-.count {
-  font-size: 1.9rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.lead {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1rem 2rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.lead h2 {
-  margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-}
-
-.lead p {
-  margin: 0.15rem 0 0;
-}
-
-.where {
-  color: var(--muted);
-}
-
-.phone a {
-  color: var(--ink);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.phone.missing {
-  color: var(--muted);
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.75rem 0 0.6rem;
-}
-
-.actions a {
-  padding: 0.3rem 0.75rem;
-  color: var(--ink);
-  font-size: 0.9rem;
-  text-decoration: none;
   border: 1px solid var(--rule);
-  border-radius: 4px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
 }
 
-.actions a:hover {
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--accent-soft);
   border-color: var(--accent);
 }
 
-.lead textarea {
+select option {
+  background: var(--surface);
+}
+
+.field-hint {
+  min-height: 1.1em;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.areas {
+  margin-top: 1rem;
+}
+
+.areas-head {
+  padding: 1rem 1.25rem 0.5rem;
+}
+
+.progress {
+  height: 4px;
+  margin-top: 0.9rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+
+.progress[hidden] {
+  display: none;
+}
+
+.progress span {
   display: block;
-  width: 100%;
-  min-height: 2.6rem;
-  font-size: 0.95rem;
-  resize: vertical;
-}
-
-.side {
-  display: grid;
-  align-content: start;
-  justify-items: end;
-  gap: 0.75rem;
-}
-
-.pips {
-  display: flex;
-  gap: 3px;
-  padding-top: 0.45rem;
-}
-
-.pip {
-  width: 8px;
-  height: 8px;
-  background: var(--rule);
-}
-
-.pip.on {
+  width: 35%;
+  height: 100%;
+  border-radius: 999px;
   background: var(--accent);
+  animation: slide 1.4s ease-in-out infinite;
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+#message {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+#message:empty {
+  display: none;
+}
+
+#message.error {
+  color: var(--bad);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.stat {
+  padding: 0.9rem 1.1rem;
+}
+
+.stat strong {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.toolbar {
+  padding: 0.9rem 1.1rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.6rem;
+}
+
+.filters select {
+  padding: 0.4rem 0.6rem;
+  font-size: 13px;
+}
+
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: auto;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chip input {
+  width: auto;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.chip:has(input:checked),
+.chip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.chip .count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.stages[hidden] {
+  display: none;
+}
+
+.view {
+  margin-top: 1rem;
+}
+
+.view[hidden] {
+  display: none;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+
+tbody tr {
+  cursor: pointer;
+}
+
+tbody tr:hover {
+  background: var(--surface-2);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sub {
+  margin-top: 0.1rem;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.star {
+  padding: 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.star[aria-pressed="true"] {
+  color: #f59e0b;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge.plain::before {
+  display: none;
+}
+
+.tone-good {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.tone-warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.tone-bad {
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.tone-info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.tone-accent {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.contact-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--muted);
 }
 
 .empty {
-  max-width: 40ch;
-  padding: 3rem 0;
+  padding: 3rem 1rem;
   color: var(--muted);
+  text-align: center;
+}
+
+.sheet th,
+.sheet td {
+  padding: 0.55rem 0.8rem;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sheet td {
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface);
+}
+
+.sheet th:first-child,
+.sheet td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  font-weight: 600;
+}
+
+.sheet thead th:first-child {
+  z-index: 3;
+}
+
+.sheet tr:hover td:first-child {
+  background: var(--surface-2);
+}
+
+.sheet-wrap {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.board {
+  display: grid;
+  grid-auto-columns: minmax(15rem, 1fr);
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 12rem;
+  padding: 0.9rem;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+
+.column-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+}
+
+.deal {
+  padding: 0.8rem 0.9rem;
+  cursor: pointer;
+}
+
+.deal:hover {
+  border-color: var(--accent);
+}
+
+.deal .name {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.deal .pills {
+  margin-top: 0.5rem;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--overlay);
+}
+
+.overlay[hidden],
+.drawer[hidden] {
+  display: none;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 11;
+  width: min(30rem, 100%);
+  overflow-y: auto;
+  padding: 1.4rem;
+  border-left: 1px solid var(--rule);
+  background: var(--surface);
+  box-shadow: -8px 0 24px rgba(15, 23, 42, 0.12);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.drawer h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.drawer h3 {
+  margin: 1.4rem 0 0.6rem;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.drawer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.drawer-meta select {
+  width: auto;
+  padding: 0.3rem 0.6rem;
+  font-size: 13px;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.offer-list,
+.reasons {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.offer-list li {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+
+.offer-list strong {
+  display: block;
+  color: var(--accent);
+}
+
+.reasons li {
+  padding-left: 1rem;
+  text-indent: -1rem;
+}
+
+.reasons li::before {
+  content: "• ";
+  color: var(--muted);
+}
+
+.manual-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.manual-form .full {
+  grid-column: 1 / -1;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
 }
 
 :focus-visible {
@@ -259,57 +824,200 @@ button.primary:disabled {
   outline-offset: 2px;
 }
 
-@media (max-width: 40rem) {
-  .lead {
+@media (max-width: 64rem) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .search form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 48rem) {
+  .app {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .side {
-    grid-auto-flow: column;
-    justify-content: space-between;
-    justify-items: start;
+  .sidebar {
+    position: static;
+    flex-direction: row;
     align-items: center;
+    height: auto;
+    padding: 0.6rem 1rem;
   }
 
-  .pips {
-    padding-top: 0;
+  .brand {
+    padding: 0;
   }
 
-  #stages {
-    gap: 1.25rem;
+  .brand span:last-child,
+  .sidebar-foot {
+    display: none;
+  }
+
+  .nav {
+    display: flex;
+    margin-left: auto;
+  }
+
+  .nav button {
+    padding: 0.5rem 0.6rem;
+  }
+
+  .nav button span {
+    display: none;
+  }
+
+  .nav button[aria-current="page"] span {
+    display: inline;
+  }
+
+  main {
+    padding: 1rem;
+  }
+
+  .search form,
+  .manual-form {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Prospecção</h1>
-    <form id="search-form">
-      <label>Segmento
-        <select id="segment"></select>
-      </label>
-      <label>Bairro
-        <input id="neighborhood" required minlength="2" placeholder="Pinheiros" autocomplete="off">
-      </label>
-      <label>Cidade
-        <input id="city" value="São Paulo" autocomplete="off">
-      </label>
-      <button id="search-button" class="primary" type="submit">Buscar leads</button>
-    </form>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </span>
+      <span>Leadfinder</span>
+    </div>
+    <nav class="nav" aria-label="Seções">
+      <button type="button" data-view="buscar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Buscar</span>
+      </button>
+      <button type="button" data-view="leads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Leads</span>
+      </button>
+      <button type="button" data-view="planilha">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+        <span>Planilha</span>
+      </button>
+      <button type="button" data-view="funil">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="7" rx="1"/></svg>
+        <span>Funil</span>
+      </button>
+    </nav>
+    <p class="sidebar-foot">© colaboradores do OpenStreetMap. Confira cada lead antes de abordar.</p>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <div>
+        <h1 id="page-title">Leads</h1>
+        <p id="page-subtitle">Negócios locais e o que oferecer a cada um.</p>
+      </div>
+      <div class="actions-row" id="head-actions">
+        <button id="export-leads" class="btn primary" type="button">Baixar Leads CSV</button>
+        <button id="export-full" class="btn" type="button">CSV completo</button>
+      </div>
+    </div>
+
     <p id="message" role="status"></p>
-  </header>
-  <div id="filters">
-    <label>Mostrar segmento
-      <select id="filter-segment"></select>
-    </label>
-    <label>Mostrar bairro
-      <select id="filter-neighborhood"></select>
-    </label>
-  </div>
-  <nav id="stages" aria-label="Etapas do funil"></nav>
-  <main id="list"></main>
+
+    <section class="view" id="view-buscar" hidden>
+    <div class="card search" aria-label="Buscar no mapa">
+      <h2 class="card-title">Buscar novos leads no mapa</h2>
+      <p class="card-hint">Vai ao OpenStreetMap e traz negócios que ainda não estão na sua lista. Se o servidor estiver ocupado, tento de novo sozinho, e isso pode levar alguns minutos.</p>
+      <form id="search-form">
+        <label>Segmento
+          <select id="segment"></select>
+        </label>
+        <label>Bairro
+          <input id="neighborhood" list="neighborhood-options" required minlength="2" placeholder="Escolha ou digite" autocomplete="off">
+          <datalist id="neighborhood-options"></datalist>
+          <span class="field-hint" id="neighborhood-hint"></span>
+        </label>
+        <label>Cidade
+          <input id="city" value="São Paulo" autocomplete="off">
+        </label>
+        <button id="search-button" class="btn primary" type="submit">Buscar leads</button>
+      </form>
+      <div id="progress" class="progress" hidden><span></span></div>
+    </div>
+    <div class="card areas" id="areas"></div>
+    </section>
+
+    <section class="stats" id="stats" aria-label="Resumo"></section>
+
+    <section class="card toolbar" id="toolbar" aria-label="Filtros">
+      <h2 class="card-title">Filtrar a sua lista</h2>
+      <p class="card-hint">Não faz busca nova: só mostra, entre os leads já salvos, os que combinam com o que você escolher.</p>
+      <div class="filters">
+        <label>Segmento
+          <select id="filter-segment" data-filter="segment"></select>
+        </label>
+        <label>Bairro
+          <select id="filter-neighborhood" data-filter="neighborhood"></select>
+        </label>
+        <label>Cidade
+          <select id="filter-city" data-filter="city"></select>
+        </label>
+        <label>UF
+          <select id="filter-uf" data-filter="uf"></select>
+        </label>
+        <label>Site
+          <select data-filter="site">
+            <option value="">Todos</option>
+            <option value="sem_site_na_fonte">Sem site no mapa</option>
+            <option value="so_rede_social">Só rede social</option>
+            <option value="ausencia_confirmada">Sem site (confirmado)</option>
+            <option value="com_site">Com site</option>
+            <option value="site_com_problemas">Site com problemas</option>
+            <option value="nao_verificado">Não verificado</option>
+          </select>
+        </label>
+        <label>Prioridade
+          <select data-filter="priority">
+            <option value="">Todas</option>
+            <option value="alta">Alta</option>
+            <option value="normal">Normal</option>
+            <option value="baixa">Baixa</option>
+          </select>
+        </label>
+        <label>Oferta
+          <select data-filter="offer">
+            <option value="">Todas</option>
+            <option value="landing_page">Landing page</option>
+            <option value="pagina_propria">Página própria</option>
+            <option value="cardapio_proprio">Cardápio próprio</option>
+            <option value="cardapio_digital">Cardápio digital</option>
+            <option value="dominio_proprio">Domínio próprio</option>
+            <option value="reformulacao">Reformulação</option>
+          </select>
+        </label>
+      </div>
+      <div class="toggles">
+        <label class="chip"><input type="checkbox" data-filter="phone"> Com telefone</label>
+        <label class="chip"><input type="checkbox" data-filter="email"> Com e-mail</label>
+        <label class="chip"><input type="checkbox" data-filter="instagram"> Com Instagram</label>
+        <label class="chip"><input type="checkbox" data-filter="favorite"> Favoritos</label>
+      </div>
+      <div class="stages" id="stages" aria-label="Etapas do funil"></div>
+    </section>
+
+    <section class="view" id="view-leads"></section>
+    <section class="view" id="view-planilha" hidden></section>
+    <section class="view" id="view-funil" hidden></section>
+  </main>
 </div>
+
+<div class="overlay" id="overlay" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Detalhes do lead"></aside>
+
 <script>
 const STAGES = [
   ["novo", "Novos"],
@@ -325,13 +1033,79 @@ const STATUS_LABELS = {
   fechado: "Fechado",
   descartado: "Descartado",
 };
-const PIPS = 6;
+const STATUS_TONES = {
+  novo: "tone-info",
+  contatado: "tone-warn",
+  respondeu: "tone-accent",
+  fechado: "tone-good",
+  descartado: "",
+};
+const LEVEL_LABELS = {
+  maxima: "máxima",
+  alta: "alta",
+  media: "média",
+  normal: "normal",
+  baixa: "baixa",
+  indeterminada: "indeterminada",
+};
+const PRIORITY_TONES = { alta: "tone-good", normal: "tone-warn", baixa: "tone-bad" };
+const SITE_LABELS = {
+  nao_verificado: "Não verificado",
+  sem_site_na_fonte: "Sem site no mapa",
+  so_rede_social: "Só rede social",
+  site_informado: "Site no mapa",
+  site_ok: "Site ok",
+  site_com_problemas: "Site com problemas",
+  site_inacessivel: "Site fora do ar",
+  ausencia_confirmada: "Sem site (você confirmou)",
+};
+const SITE_TONES = {
+  nao_verificado: "",
+  sem_site_na_fonte: "tone-warn",
+  so_rede_social: "tone-warn",
+  site_informado: "tone-info",
+  site_ok: "tone-good",
+  site_com_problemas: "tone-bad",
+  site_inacessivel: "tone-bad",
+  ausencia_confirmada: "tone-accent",
+};
+const NO_OWN_SITE = ["sem_site_na_fonte", "so_rede_social", "ausencia_confirmada"];
+const VIEWS = {
+  buscar: ["Buscar", "Procure negócios novos no mapa e veja o que você já buscou."],
+  leads: ["Leads", "Negócios locais e o que oferecer a cada um."],
+  planilha: ["Planilha", "As mesmas colunas do Leads CSV, direto na tela."],
+  funil: ["Funil", "Em que etapa está cada conversa."],
+};
+const EMPTY_FILTER = {
+  segment: "",
+  neighborhood: "",
+  city: "",
+  uf: "",
+  site: "",
+  priority: "",
+  offer: "",
+  phone: false,
+  email: false,
+  instagram: false,
+  favorite: false,
+};
+const MANUAL_FIELDS = [
+  ["manual_phone", "Telefone", "(11) 3333-4444"],
+  ["manual_whatsapp", "WhatsApp", "(11) 98888-7777"],
+  ["manual_instagram", "Instagram", "@perfil"],
+  ["manual_website", "Site próprio", "https://"],
+];
 
 const state = {
+  view: "leads",
+  areas: [],
   leads: [],
+  sheet: { columns: [], ids: [], rows: [] },
   segments: {},
+  options: { segments: [], neighborhoods: [], cities: [], ufs: [] },
   stage: "novo",
-  filter: { segment: "", neighborhood: "" },
+  filter: { ...EMPTY_FILTER },
+  open: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -353,6 +1127,19 @@ function plural(count, one, many) {
   return `${count} ${count === 1 ? one : many}`;
 }
 
+function textKey(text) {
+  return (text || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function formatDate(stamp) {
+  return new Date(`${stamp.replace(" ", "T")}Z`).toLocaleDateString("pt-BR");
+}
+
 function showMessage(text, isError = false) {
   $("message").textContent = text;
   $("message").className = isError ? "error" : "";
@@ -369,6 +1156,75 @@ async function api(path, options) {
     );
   }
   return body;
+}
+
+function filterQuery(withStage) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(state.filter)) {
+    if (value) params.set(key, value === true ? "true" : value);
+  }
+  if (withStage && state.stage) params.set("status", state.stage);
+  return params.toString();
+}
+
+async function refresh() {
+  if (state.view === "buscar") {
+    await loadAreas();
+    render();
+    return;
+  }
+  state.leads = await api(`/api/leads?${filterQuery(false)}`);
+  if (state.view === "planilha") {
+    state.sheet = await api(`/api/leads-table?${filterQuery(true)}`);
+  }
+  render();
+}
+
+async function loadOptions() {
+  state.options = await api("/api/filter-options");
+}
+
+async function loadNeighborhoods() {
+  const city = $("city").value.trim();
+  let names = [];
+  try {
+    names = await api(`/api/neighborhoods?city=${enc(city)}`);
+  } catch (error) {
+    names = [];
+  }
+  $("neighborhood-options").replaceChildren(...names.map((name) => h("option", { value: name })));
+  $("neighborhood-hint").textContent = names.length
+    ? `${plural(names.length, "bairro", "bairros")} de ${city} para escolher. Digite para filtrar.`
+    : "Sem lista para essa cidade: digite o bairro.";
+}
+
+async function loadAreas() {
+  state.areas = await api("/api/areas");
+}
+
+function badge(text, tone = "", plain = false) {
+  return h("span", { class: `badge ${tone}${plain ? " plain" : ""}` }, text);
+}
+
+function priorityBadge(lead) {
+  const level = lead.evaluation.priority.level;
+  return badge(`Prioridade ${LEVEL_LABELS[level]}`, PRIORITY_TONES[level]);
+}
+
+function siteBadge(lead) {
+  return badge(SITE_LABELS[lead.site_state] || lead.site_state, SITE_TONES[lead.site_state]);
+}
+
+function stageBadge(lead) {
+  return badge(STATUS_LABELS[lead.status], STATUS_TONES[lead.status]);
+}
+
+function offerPills(lead, limit = 2) {
+  const offers = lead.evaluation.offers;
+  if (offers.length === 0) return h("span", { class: "muted" }, "—");
+  const shown = offers.slice(0, limit).map((offer) => badge(offer.label, "tone-accent", true));
+  const rest = offers.length - limit;
+  return h("div", { class: "pills" }, ...shown, rest > 0 ? badge(`+${rest}`, "", true) : null);
 }
 
 function whatsappUrl(phone) {
@@ -398,15 +1254,32 @@ function siteCheckUrl(lead) {
   return `https://www.google.com/search?q=${enc(placeQuery(lead))}`;
 }
 
-function externalLink(href, label) {
+function instagramSearchUrl(lead) {
+  const query = `site:instagram.com ${lead.name} ${lead.neighborhood}`;
+  return `https://www.google.com/search?q=${enc(query)}`;
+}
+
+function externalLink(href, label, extraClass = "btn small") {
   return h(
     "a",
-    { href, target: "_blank", rel: "noopener noreferrer" },
+    { href, class: extraClass, target: "_blank", rel: "noopener noreferrer" },
     label
   );
 }
 
-async function updateLead(id, patch, rerender = true) {
+function whatsappLink(lead) {
+  if (lead.manual_whatsapp) {
+    return externalLink(`https://wa.me/55${lead.manual_whatsapp}`, "WhatsApp");
+  }
+  const potential = lead.phone ? whatsappUrl(lead.phone) : null;
+  return potential ? externalLink(potential, "WhatsApp (não confirmado)") : null;
+}
+
+function findLead(id) {
+  return state.leads.find((lead) => lead.id === id) || null;
+}
+
+async function updateLead(id, patch, reload = true) {
   try {
     const updated = await api(`/api/leads/${enc(id)}`, {
       method: "PATCH",
@@ -414,179 +1287,557 @@ async function updateLead(id, patch, rerender = true) {
       body: JSON.stringify(patch),
     });
     state.leads = state.leads.map((lead) => (lead.id === id ? updated : lead));
-    if (rerender) render();
+    if (state.open && state.open.id === id) state.open = updated;
+    if (reload) {
+      await refresh();
+      renderDrawer();
+    }
   } catch (error) {
     showMessage(error.message, true);
   }
 }
 
-function leadRow(lead) {
-  const segmentLabel = state.segments[lead.segment] || lead.segment;
-  const whatsapp = lead.phone ? whatsappUrl(lead.phone) : null;
-  const pips = h(
-    "div",
+function favoriteButton(lead) {
+  return h(
+    "button",
     {
-      class: "pips",
-      role: "img",
-      "aria-label": `Cadastro completo em ${lead.score} de ${PIPS} itens`,
-      title:
-        "Quanto mais completo o cadastro no mapa (telefone, horário, endereço, Instagram), mais fácil de abordar",
+      type: "button",
+      class: "star",
+      title: lead.favorite ? "Tirar dos favoritos" : "Favoritar",
+      "aria-label": lead.favorite ? `Tirar ${lead.name} dos favoritos` : `Favoritar ${lead.name}`,
+      "aria-pressed": String(Boolean(lead.favorite)),
+      onclick: (event) => {
+        event.stopPropagation();
+        updateLead(lead.id, { favorite: !lead.favorite });
+      },
     },
-    ...Array.from({ length: PIPS }, (_, index) =>
-      h("span", { class: index < lead.score ? "pip on" : "pip" })
+    lead.favorite ? "★" : "☆"
+  );
+}
+
+function openLead(id) {
+  state.open = findLead(id);
+  renderDrawer();
+}
+
+function closeDrawer() {
+  state.open = null;
+  renderDrawer();
+}
+
+function renderStats() {
+  const leads = state.leads;
+  const count = (test) => leads.filter(test).length;
+  const items = [
+    [leads.length, "Leads (todas as etapas)"],
+    [count((lead) => lead.evaluation.priority.level === "alta"), "Prioridade alta"],
+    [count((lead) => NO_OWN_SITE.includes(lead.site_state)), "Sem site próprio"],
+    [count((lead) => lead.status !== "novo"), "Já abordados"],
+  ];
+  $("stats").replaceChildren(
+    ...items.map(([value, label]) =>
+      h("div", { class: "card stat" }, h("strong", {}, String(value)), h("span", {}, label))
     )
   );
-  const status = h(
+}
+
+function filterSelect(id, key, values, allLabel, labelOf) {
+  const active = state.filter[key];
+  const shown = active && !values.includes(active) ? [active, ...values] : values;
+  $(id).replaceChildren(
+    h("option", { value: "", selected: !active }, allLabel),
+    ...shown.map((value) => h("option", { value, selected: active === value }, labelOf(value)))
+  );
+}
+
+function renderFilters() {
+  const same = (value) => value;
+  const { segments, neighborhoods, cities, ufs } = state.options;
+  filterSelect("filter-segment", "segment", segments, "Todos", (key) => state.segments[key] || key);
+  filterSelect("filter-neighborhood", "neighborhood", neighborhoods, "Todos", same);
+  filterSelect("filter-city", "city", cities, "Todas", same);
+  filterSelect("filter-uf", "uf", ufs, "Todas", same);
+  document.querySelectorAll("[data-filter]").forEach((control) => {
+    const value = state.filter[control.dataset.filter];
+    if (control.type === "checkbox") control.checked = value;
+    else control.value = value;
+  });
+}
+
+function renderStages() {
+  const counts = Object.fromEntries(STAGES.map(([key]) => [key, 0]));
+  state.leads.forEach((lead) => {
+    counts[lead.status] += 1;
+  });
+  const chip = (key, label, count) =>
+    h(
+      "button",
+      {
+        type: "button",
+        class: "chip",
+        "data-stage": key,
+        "aria-pressed": String(state.stage === key),
+        onclick: () => {
+          state.stage = key;
+          refresh().catch((error) => showMessage(error.message, true));
+        },
+      },
+      label,
+      h("span", { class: "count" }, String(count))
+    );
+  $("stages").hidden = state.view === "funil";
+  $("stages").replaceChildren(
+    chip("", "Todas as etapas", state.leads.length),
+    ...STAGES.map(([key, label]) => chip(key, label, counts[key]))
+  );
+}
+
+function emptyText() {
+  if (state.options.segments.length === 0) {
+    return "Nenhum lead ainda. Vá em Buscar, escolha um segmento e um bairro e procure no mapa.";
+  }
+  if (state.leads.length === 0) return "Nenhum lead com esses filtros.";
+  return "Nenhum lead nesta etapa.";
+}
+
+function stageLeads() {
+  return state.leads.filter((lead) => !state.stage || lead.status === state.stage);
+}
+
+function contactCell(lead) {
+  const tags = [
+    lead.manual_whatsapp || lead.phone_kind === "celular" ? badge("WhatsApp", "tone-good", true) : null,
+    lead.instagram ? badge("Instagram", "tone-accent", true) : null,
+    lead.email ? badge("E-mail", "tone-info", true) : null,
+  ].filter(Boolean);
+  return h(
+    "td",
+    { class: "contact-cell" },
+    lead.phone ? h("div", {}, lead.phone) : h("div", { class: "muted" }, "Sem telefone"),
+    tags.length ? h("div", { class: "pills", style: "margin-top: 0.3rem" }, ...tags) : null
+  );
+}
+
+function leadTableRow(lead) {
+  const segmentLabel = state.segments[lead.segment] || lead.segment;
+  return h(
+    "tr",
+    { "data-id": lead.id, onclick: () => openLead(lead.id) },
+    h("td", {}, favoriteButton(lead)),
+    h(
+      "td",
+      {},
+      h("button", { type: "button", class: "name" }, lead.name),
+      h("div", { class: "sub" }, `${segmentLabel} · ${lead.neighborhood}`)
+    ),
+    contactCell(lead),
+    h("td", {}, siteBadge(lead)),
+    h("td", {}, offerPills(lead)),
+    h("td", {}, priorityBadge(lead)),
+    h("td", {}, stageBadge(lead))
+  );
+}
+
+function renderLeads() {
+  const visible = stageLeads();
+  if (visible.length === 0) {
+    $("view-leads").replaceChildren(h("div", { class: "card empty" }, emptyText()));
+    return;
+  }
+  const headers = ["", "Negócio", "Contato", "Site", "Oferecer", "Prioridade", "Etapa"];
+  $("view-leads").replaceChildren(
+    h(
+      "div",
+      { class: "card table-wrap" },
+      h(
+        "table",
+        { class: "leads" },
+        h("thead", {}, h("tr", {}, ...headers.map((title) => h("th", {}, title)))),
+        h("tbody", {}, ...visible.map(leadTableRow))
+      )
+    )
+  );
+}
+
+function sheetCell(value) {
+  const text = value == null ? "" : String(value);
+  if (/^https?:\/\//.test(text)) {
+    return h(
+      "td",
+      { title: text },
+      h("a", { href: text, target: "_blank", rel: "noopener noreferrer", onclick: (event) => event.stopPropagation() }, text)
+    );
+  }
+  return h("td", { title: text }, text);
+}
+
+function renderSheet() {
+  const { columns, ids, rows } = state.sheet;
+  if (rows.length === 0) {
+    $("view-planilha").replaceChildren(h("div", { class: "card empty" }, emptyText()));
+    return;
+  }
+  $("view-planilha").replaceChildren(
+    h(
+      "div",
+      { class: "card" },
+      h(
+        "div",
+        { class: "sheet-head" },
+        h("strong", {}, plural(rows.length, "linha", "linhas")),
+        h("span", { class: "muted" }, "É exatamente o que vai no Leads CSV. Clique numa linha para abrir o lead.")
+      ),
+      h(
+        "div",
+        { class: "sheet-wrap" },
+        h(
+          "table",
+          { class: "sheet" },
+          h("thead", {}, h("tr", {}, ...columns.map((title) => h("th", {}, title)))),
+          h(
+            "tbody",
+            {},
+            ...rows.map((row, index) =>
+              h("tr", { "data-id": ids[index], onclick: () => openLead(ids[index]) }, ...row.map(sheetCell))
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
+function stageSelect(lead) {
+  return h(
     "select",
     {
       "aria-label": `Etapa de ${lead.name}`,
       onchange: (event) => updateLead(lead.id, { status: event.target.value }),
     },
-    ...STAGES.map(([key]) =>
-      h(
-        "option",
-        { value: key, selected: key === lead.status },
-        STATUS_LABELS[key]
-      )
-    )
+    ...STAGES.map(([key]) => h("option", { value: key, selected: key === lead.status }, STATUS_LABELS[key]))
   );
+}
 
+function dealCard(lead) {
+  const segmentLabel = state.segments[lead.segment] || lead.segment;
+  const firstOffer = lead.evaluation.offers[0];
   return h(
     "article",
-    { class: "lead" },
+    { class: "card deal", "data-id": lead.id, onclick: () => openLead(lead.id) },
+    h("button", { type: "button", class: "name" }, lead.name),
+    h("div", { class: "sub" }, `${segmentLabel} · ${lead.neighborhood}`),
+    h("div", { class: "pills" }, priorityBadge(lead), firstOffer ? badge(firstOffer.label, "tone-accent", true) : null)
+  );
+}
+
+function renderBoard() {
+  if (state.leads.length === 0) {
+    $("view-funil").replaceChildren(h("div", { class: "card empty" }, emptyText()));
+    return;
+  }
+  $("view-funil").replaceChildren(
     h(
       "div",
-      { class: "info" },
-      h("h2", {}, lead.name),
-      h("p", { class: "where" }, `${segmentLabel} em ${lead.neighborhood}`),
-      lead.address ? h("p", { class: "address" }, lead.address) : null,
-      lead.phone
-        ? h(
-            "p",
-            { class: "phone" },
-            h("a", { href: `tel:${lead.phone.replace(/[^\d+]/g, "")}` }, lead.phone)
-          )
-        : h("p", { class: "phone missing" }, "Sem telefone cadastrado"),
-      h(
-        "div",
-        { class: "actions" },
-        externalLink(mapsUrl(lead), "Checar no Maps"),
-        externalLink(siteCheckUrl(lead), "Conferir site"),
-        lead.instagram ? externalLink(instagramUrl(lead.instagram), "Instagram") : null,
-        whatsapp ? externalLink(whatsapp, "WhatsApp") : null
-      ),
-      h(
-        "textarea",
-        {
-          rows: "2",
-          placeholder: "Anotações: quem atendeu, o que ficou combinado",
-          "aria-label": `Anotações sobre ${lead.name}`,
-          onchange: (event) =>
-            updateLead(lead.id, { notes: event.target.value }, false),
-        },
-        lead.notes
-      )
-    ),
-    h("div", { class: "side" }, pips, status)
-  );
-}
-
-function filteredLeads() {
-  const { segment, neighborhood } = state.filter;
-  return state.leads.filter(
-    (lead) =>
-      (!segment || lead.segment === segment) &&
-      (!neighborhood || lead.neighborhood === neighborhood)
-  );
-}
-
-function filterSelect(id, key, allLabel, labelOf) {
-  const values = [...new Set(state.leads.map((lead) => lead[key]))].sort();
-  $(id).replaceChildren(
-    h("option", { value: "", selected: state.filter[key] === "" }, allLabel),
-    ...values.map((value) =>
-      h(
-        "option",
-        { value, selected: state.filter[key] === value },
-        labelOf(value)
-      )
+      { class: "board" },
+      ...STAGES.map(([key, label]) => {
+        const leads = state.leads.filter((lead) => lead.status === key);
+        return h(
+          "section",
+          { class: "column", "data-stage": key },
+          h("div", { class: "column-head" }, label, badge(String(leads.length), "", true)),
+          ...(leads.length ? leads.map(dealCard) : [h("p", { class: "muted" }, "Nenhum lead.")])
+        );
+      })
     )
   );
 }
 
-function renderFilters() {
-  filterSelect(
-    "filter-segment",
-    "segment",
-    "Todos os segmentos",
-    (key) => state.segments[key] || key
-  );
-  filterSelect(
-    "filter-neighborhood",
-    "neighborhood",
-    "Todos os bairros",
-    (value) => value
+function manualForm(lead) {
+  return h(
+    "form",
+    {
+      class: "manual-form",
+      onsubmit: (event) => {
+        event.preventDefault();
+        const data = new FormData(event.target);
+        updateLead(lead.id, Object.fromEntries(MANUAL_FIELDS.map(([key]) => [key, data.get(key)])));
+      },
+    },
+    ...MANUAL_FIELDS.map(([key, label, placeholder]) =>
+      h(
+        "label",
+        {},
+        label,
+        h("input", { name: key, value: lead[key] || "", placeholder, autocomplete: "off" })
+      )
+    ),
+    h("button", { type: "submit", class: "btn primary full" }, "Salvar checagem")
   );
 }
 
-function renderStages() {
-  const counts = Object.fromEntries(STAGES.map(([key]) => [key, 0]));
-  filteredLeads().forEach((lead) => {
-    counts[lead.status] += 1;
-  });
-  $("stages").replaceChildren(
-    ...STAGES.map(([key, label]) =>
+function renderDrawer() {
+  const lead = state.open ? findLead(state.open.id) || state.open : null;
+  $("drawer").hidden = !lead;
+  $("overlay").hidden = !lead;
+  if (!lead) return;
+  state.open = lead;
+  const { contact, opportunity, offers, priority } = lead.evaluation;
+  const segmentLabel = state.segments[lead.segment] || lead.segment;
+  const place = [segmentLabel, lead.neighborhood, lead.city, lead.uf].filter(Boolean).join(" · ");
+  const checked = lead.manual_checked_at
+    ? `Última checagem manual em ${formatDate(lead.manual_checked_at)}.`
+    : "Confira no Google e registre aqui o que encontrar.";
+  const absence = lead.absence_confirmed_at
+    ? `Desfazer "sem site" (confirmado em ${formatDate(lead.absence_confirmed_at)})`
+    : "Confirmar que não tem site";
+  $("drawer").replaceChildren(
+    h(
+      "div",
+      { class: "drawer-head" },
+      h("div", {}, h("h2", {}, lead.name), h("div", { class: "sub" }, place)),
+      h("button", { type: "button", class: "icon-btn", "aria-label": "Fechar", onclick: closeDrawer }, "✕")
+    ),
+    h(
+      "div",
+      { class: "drawer-meta" },
+      priorityBadge(lead),
+      siteBadge(lead),
+      stageSelect(lead),
       h(
         "button",
         {
           type: "button",
-          "aria-pressed": String(state.stage === key),
-          onclick: () => {
-            state.stage = key;
-            render();
-          },
+          class: "btn small",
+          "data-role": "favorite",
+          "aria-pressed": String(Boolean(lead.favorite)),
+          onclick: () => updateLead(lead.id, { favorite: !lead.favorite }),
         },
-        h("span", { class: "count" }, String(counts[key])),
-        h("span", {}, label)
+        lead.favorite ? "★ Favorito" : "☆ Favoritar"
+      )
+    ),
+    h("h3", {}, "O que oferecer"),
+    offers.length
+      ? h(
+          "ul",
+          { class: "offer-list" },
+          ...offers.map((offer) => h("li", {}, h("strong", {}, offer.label), offer.reason))
+        )
+      : h("p", { class: "muted" }, "Nenhuma oferta até a presença digital ser conhecida."),
+    h("h3", {}, "Contato"),
+    h(
+      "p",
+      {},
+      lead.phone
+        ? h("a", { href: `tel:${lead.phone.replace(/[^\d+]/g, "")}` }, lead.phone)
+        : h("span", { class: "muted" }, "Sem telefone cadastrado"),
+      lead.address ? h("span", { class: "muted" }, ` · ${lead.address}`) : null
+    ),
+    h(
+      "div",
+      { class: "links" },
+      whatsappLink(lead),
+      lead.instagram
+        ? externalLink(instagramUrl(lead.instagram), "Instagram")
+        : externalLink(instagramSearchUrl(lead), "Procurar Instagram"),
+      lead.website ? externalLink(lead.website, "Abrir site") : null,
+      externalLink(siteCheckUrl(lead), "Conferir site"),
+      externalLink(mapsUrl(lead), "Checar no Maps")
+    ),
+    h("h3", {}, "Checagem manual"),
+    h("p", { class: "muted", "data-role": "checked" }, checked),
+    manualForm(lead),
+    h(
+      "p",
+      {},
+      h(
+        "button",
+        {
+          type: "button",
+          class: "btn",
+          "data-role": "absence",
+          onclick: () => updateLead(lead.id, { absence_confirmed: !lead.absence_confirmed_at }),
+        },
+        absence
+      )
+    ),
+    h("h3", {}, "Por que esta prioridade"),
+    h("p", {}, priority.reason),
+    h("p", { class: "muted" }, `Contato: ${LEVEL_LABELS[contact.level]} (${plural(contact.points, "ponto", "pontos")})`),
+    h("ul", { class: "reasons" }, ...contact.reasons.map((reason) => h("li", {}, reason))),
+    h("p", { class: "muted" }, `Oportunidade: ${LEVEL_LABELS[opportunity.level]}`),
+    h("ul", { class: "reasons" }, ...opportunity.reasons.map((reason) => h("li", {}, reason))),
+    h("h3", {}, "Anotações"),
+    h(
+      "textarea",
+      {
+        rows: "4",
+        placeholder: "Quem atendeu, o que ficou combinado",
+        "aria-label": `Anotações sobre ${lead.name}`,
+        onchange: (event) => updateLead(lead.id, { notes: event.target.value }, false),
+      },
+      lead.notes
+    )
+  );
+}
+
+function areaRow(area) {
+  const segmentLabel = state.segments[area.segment] || area.segment;
+  const place = [area.city, area.uf].filter(Boolean).join(" · ") || "—";
+  return h(
+    "tr",
+    {},
+    h("td", {}, h("span", { class: "name" }, segmentLabel)),
+    h("td", {}, area.neighborhood),
+    h("td", {}, place),
+    h("td", {}, String(area.total)),
+    h("td", {}, area.high_priority ? badge(String(area.high_priority), "tone-good", true) : "0"),
+    h("td", {}, String(area.contacted)),
+    h("td", { class: "muted" }, area.last_seen ? formatDate(area.last_seen) : "—"),
+    h(
+      "td",
+      {},
+      h("div", { class: "pills" },
+        h("button", { type: "button", class: "btn small", "data-action": "see", onclick: () => seeArea(area) }, "Ver leads"),
+        h("button", { type: "button", class: "btn small", "data-action": "again", onclick: () => searchAgain(area) }, "Buscar de novo")
       )
     )
   );
 }
 
-function renderList() {
-  const visible = filteredLeads().filter((lead) => lead.status === state.stage);
-  if (visible.length === 0) {
-    const text =
-      state.leads.length === 0
-        ? "Nenhum lead ainda. Escolha um segmento e um bairro e clique em Buscar leads."
-        : "Nenhum lead nesta etapa.";
-    $("list").replaceChildren(h("p", { class: "empty" }, text));
+function renderAreas() {
+  const headers = ["Segmento", "Bairro", "Cidade", "Leads", "Prioridade alta", "Já abordados", "Atualizado", ""];
+  const head = h(
+    "div",
+    { class: "areas-head" },
+    h("h2", { class: "card-title" }, "Áreas que você já buscou"),
+    h("p", { class: "card-hint" }, "Montada a partir dos leads salvos. Uma busca que não trouxe nenhum lead não aparece aqui.")
+  );
+  if (state.areas.length === 0) {
+    $("areas").replaceChildren(head, h("div", { class: "empty" }, "Você ainda não buscou nada."));
     return;
   }
-  $("list").replaceChildren(...visible.map(leadRow));
+  $("areas").replaceChildren(
+    head,
+    h(
+      "div",
+      { class: "table-wrap" },
+      h(
+        "table",
+        {},
+        h("thead", {}, h("tr", {}, ...headers.map((title) => h("th", {}, title)))),
+        h("tbody", {}, ...state.areas.map(areaRow))
+      )
+    )
+  );
+}
+
+function seeArea(area) {
+  state.stage = "";
+  state.filter = {
+    ...EMPTY_FILTER,
+    segment: area.segment,
+    neighborhood: matchOption(state.options.neighborhoods, area.neighborhood) || area.neighborhood,
+    city: area.city ? matchOption(state.options.cities, area.city) || area.city : "",
+  };
+  showView("leads");
+}
+
+function searchAgain(area) {
+  $("segment").value = area.segment;
+  $("neighborhood").value = area.neighborhood;
+  $("city").value = area.city || "São Paulo";
+  $("neighborhood").focus();
+  showMessage("Campos preenchidos. Clique em Buscar leads para repetir a busca.");
+}
+
+function renderView() {
+  const [title, subtitle] = VIEWS[state.view];
+  const searching = state.view === "buscar";
+  $("page-title").textContent = title;
+  $("page-subtitle").textContent = subtitle;
+  $("head-actions").hidden = searching;
+  $("stats").hidden = searching;
+  $("toolbar").hidden = searching;
+  if (searching) renderAreas();
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.setAttribute("aria-current", button.dataset.view === state.view ? "page" : "false");
+  });
+  Object.keys(VIEWS).forEach((view) => {
+    $(`view-${view}`).hidden = view !== state.view;
+  });
+  if (state.view === "leads") renderLeads();
+  if (state.view === "planilha") renderSheet();
+  if (state.view === "funil") renderBoard();
 }
 
 function render() {
+  renderStats();
   renderFilters();
   renderStages();
-  renderList();
+  renderView();
 }
 
-$("filter-segment").addEventListener("change", (event) => {
-  state.filter.segment = event.target.value;
-  render();
+async function exportCsv(kind) {
+  try {
+    const response = await fetch(`/api/export/${kind}?${filterQuery(true)}`);
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.detail || "Não consegui exportar. Tente de novo.");
+    }
+    const disposition = response.headers.get("Content-Disposition") || "";
+    const name = (disposition.match(/filename="([^"]+)"/) || [])[1] || "leads.csv";
+    const url = URL.createObjectURL(await response.blob());
+    const link = h("a", { href: url, download: name });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showMessage(`Arquivo ${name} baixado.`);
+  } catch (error) {
+    showMessage(error.message, true);
+  }
+}
+
+function matchOption(values, typed) {
+  return values.find((value) => textKey(value) === textKey(typed)) || "";
+}
+
+function showView(view) {
+  state.view = VIEWS[view] ? view : "leads";
+  if (location.hash !== `#${state.view}`) history.replaceState(null, "", `#${state.view}`);
+  refresh().catch((error) => showMessage(error.message, true));
+}
+
+document.querySelectorAll("[data-filter]").forEach((control) => {
+  control.addEventListener("change", () => {
+    state.filter[control.dataset.filter] =
+      control.type === "checkbox" ? control.checked : control.value;
+    refresh().catch((error) => showMessage(error.message, true));
+  });
 });
 
-$("filter-neighborhood").addEventListener("change", (event) => {
-  state.filter.neighborhood = event.target.value;
-  render();
+document.querySelectorAll("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => showView(button.dataset.view));
 });
+
+$("city").addEventListener("change", () => {
+  loadNeighborhoods();
+});
+
+$("overlay").addEventListener("click", closeDrawer);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.open) closeDrawer();
+});
+
+$("export-leads").addEventListener("click", () => exportCsv("leads"));
+$("export-full").addEventListener("click", () => exportCsv("completo"));
 
 $("search-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = $("search-button");
   button.disabled = true;
-  showMessage("Buscando no mapa. Isso pode levar até um minuto.");
+  $("progress").hidden = false;
+  showMessage("Buscando no mapa. Pode levar de meio minuto a alguns minutos se o servidor estiver ocupado.");
   try {
     const result = await api("/api/search", {
       method: "POST",
@@ -597,20 +1848,24 @@ $("search-form").addEventListener("submit", async (event) => {
         city: $("city").value,
       }),
     });
-    state.leads = await api("/api/leads");
+    await loadOptions();
     state.stage = "novo";
     state.filter = {
-      segment: $("segment").value,
-      neighborhood: $("neighborhood").value.trim(),
+      ...EMPTY_FILTER,
+      segment: matchOption(state.options.segments, $("segment").value),
+      neighborhood: matchOption(state.options.neighborhoods, $("neighborhood").value),
     };
-    render();
+    state.view = "leads";
+    history.replaceState(null, "", "#leads");
+    await refresh();
     showMessage(
-      `${plural(result.total, "lugar", "lugares")} no mapa, ${result.found} sem site cadastrado, ${plural(result.added, "novo", "novos")} na sua lista.`
+      `${plural(result.total, "lugar", "lugares")} no mapa, ${result.without_site} sem site cadastrado, ${plural(result.added, "novo", "novos")} na sua lista.`
     );
   } catch (error) {
     showMessage(error.message, true);
   } finally {
     button.disabled = false;
+    $("progress").hidden = true;
   }
 });
 
@@ -621,8 +1876,11 @@ async function init() {
       state.segments[key] = label;
       $("segment").append(h("option", { value: key }, label));
     });
-    state.leads = await api("/api/leads");
-    render();
+    await loadOptions();
+    await loadNeighborhoods();
+    const first = state.options.segments.length ? "leads" : "buscar";
+    state.view = VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : first;
+    await refresh();
   } catch (error) {
     showMessage(error.message, true);
   }
