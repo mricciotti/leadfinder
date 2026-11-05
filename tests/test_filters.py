@@ -208,3 +208,20 @@ def test_areas_show_the_city_even_when_the_first_lead_has_none(leads):
     area = next(item for item in filters.areas(leads) if item["neighborhood"] == "Pinheiros")
 
     assert (area["city"], area["uf"]) == ("São Paulo", "SP")
+
+
+def test_not_contacted_includes_possible_prospects(leads):
+    for lead in leads:
+        if lead["name"] == "So Insta":
+            lead["status"] = "prospecto"
+
+    assert "So Insta" in [
+        item["name"] for item in filters.apply(leads, LeadFilter(not_contacted=True).model_dump())
+    ]
+
+
+def test_areas_do_not_count_possible_prospects_as_contacted(leads):
+    for lead in leads:
+        lead["status"] = "prospecto"
+
+    assert all(area["contacted"] == 0 for area in filters.areas(leads))

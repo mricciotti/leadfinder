@@ -394,3 +394,44 @@ def test_search_does_not_retry_when_everything_works():
 
     assert calls["overpass"] == 1
     assert waits == []
+
+
+NEW_SEGMENTS = {
+    "clinica": ("Clínica e consultório", {("amenity", "doctors"), ("amenity", "clinic"), ("healthcare", "doctor"), ("healthcare", "clinic")}),
+    "oficina": ("Oficina mecânica", {("shop", "car_repair")}),
+    "petshop": ("Pet shop", {("shop", "pet"), ("shop", "pet_grooming")}),
+    "veterinario": ("Veterinário", {("amenity", "veterinary")}),
+    "confeitaria": ("Confeitaria e doceria", {("shop", "pastry"), ("shop", "confectionery")}),
+    "sorveteria": ("Sorveteria", {("amenity", "ice_cream")}),
+    "otica": ("Ótica", {("shop", "optician")}),
+    "imobiliaria": ("Imobiliária", {("office", "estate_agent")}),
+}
+
+
+@pytest.mark.parametrize("key", NEW_SEGMENTS)
+def test_new_segments_have_the_verified_osm_tags(key):
+    label, tags = NEW_SEGMENTS[key]
+
+    assert overpass.SEGMENTS[key][0] == label
+    assert set(overpass.SEGMENTS[key][1]) == tags
+
+
+@pytest.mark.parametrize("key", NEW_SEGMENTS)
+def test_new_segments_build_a_query_for_every_tag(key):
+    query = overpass.build_query(key, (-23.6, -46.7, -23.5, -46.6))
+
+    for tag_key, tag_value in NEW_SEGMENTS[key][1]:
+        assert f'nwr["{tag_key}"="{tag_value}"]["name"]' in query
+
+
+def test_every_segment_has_a_label_and_at_least_one_tag():
+    for key, (label, tags) in overpass.SEGMENTS.items():
+        assert key == key.lower() and key.isascii() and key.isalpha()
+        assert label.strip()
+        assert tags and all(len(tag) == 2 for tag in tags)
+
+
+def test_segment_labels_are_unique():
+    labels = [label for label, _ in overpass.SEGMENTS.values()]
+
+    assert len(labels) == len(set(labels))

@@ -5,7 +5,8 @@ from datetime import datetime
 
 import contacts
 
-STATUSES = ("novo", "contatado", "respondeu", "fechado", "descartado")
+STATUSES = ("novo", "prospecto", "contatado", "respondeu", "fechado", "descartado")
+NOT_APPROACHED = ("novo", "prospecto")
 SOURCE_SITE_STATES = ("nao_verificado", "sem_site_na_fonte", "so_rede_social", "site_informado")
 SITE_STATES = (
     *SOURCE_SITE_STATES,
@@ -124,7 +125,25 @@ def add_manual_check(conn):
     )
 
 
-MIGRATIONS = (add_presence_columns, add_manual_check)
+OLD_STAGE_CHECK = "CHECK (status IN ('novo', 'contatado', 'respondeu', 'fechado', 'descartado'))"
+
+
+def allow_prospect_stage(conn):
+    sql = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'leads'"
+    ).fetchone()[0]
+    if OLD_STAGE_CHECK not in sql:
+        return
+    new_sql = sql.replace(
+        OLD_STAGE_CHECK, f"CHECK (status IN ({sql_list(STATUSES)}))"
+    ).replace("CREATE TABLE leads", "CREATE TABLE leads_new", 1)
+    conn.execute(new_sql)
+    conn.execute("INSERT INTO leads_new SELECT * FROM leads")
+    conn.execute("DROP TABLE leads")
+    conn.execute("ALTER TABLE leads_new RENAME TO leads")
+
+
+MIGRATIONS = (add_presence_columns, add_manual_check, allow_prospect_stage)
 
 
 def schema_version(conn):
@@ -146,11 +165,15 @@ def migrate(conn, path):
     if has_leads:
         backup(conn, path)
     conn.execute("BEGIN IMMEDIATE")
-    conn.execute(SCHEMA)
-    version = schema_version(conn)
-    for migration in MIGRATIONS[version:]:
-        migration(conn)
-    conn.execute(f"PRAGMA user_version = {len(MIGRATIONS)}")
+    try:
+        conn.execute(SCHEMA)
+        version = schema_version(conn)
+        for migration in MIGRATIONS[version:]:
+            migration(conn)
+        conn.execute(f"PRAGMA user_version = {len(MIGRATIONS)}")
+    except BaseException:
+        conn.rollback()
+        raise
     conn.commit()
 
 
@@ -179,6 +202,28 @@ def to_lead(row):
 
 def is_known(conn, lead_id):
     return conn.execute("SELECT 1 FROM leads WHERE id = ?", (lead_id,)).fetchone()
+
+
+def same_place(first, second):
+    if None in (first["lat"], first["lon"], second["lat"], second["lon"]):
+        return False
+    return (
+        first["id"].split("-")[0] != second["id"].split("-")[0]
+        and contacts.text_key(first["name"]) == contacts.text_key(second["name"])
+        and abs(first["lat"] - second["lat"]) <= SAME_PLACE_DEGREES
+        and abs(first["lon"] - second["lon"]) <= SAME_PLACE_DEGREES
+    )
+
+
+def statuses_of(conn, ids):
+    ids = list(ids)
+    if not ids:
+        return {}
+    marks = ", ".join("?" for _ in ids)
+    rows = conn.execute(
+        f"SELECT id, status FROM leads WHERE id IN ({marks})", ids
+    ).fetchall()
+    return {row["id"]: row["status"] for row in rows}
 
 
 def same_place_elsewhere(conn, lead):

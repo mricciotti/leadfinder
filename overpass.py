@@ -20,6 +20,25 @@ SEGMENTS = {
     "salao": ("Salão de beleza", [("shop", "hairdresser"), ("shop", "beauty")]),
     "dentista": ("Dentista", [("amenity", "dentist"), ("healthcare", "dentist")]),
     "academia": ("Academia", [("leisure", "fitness_centre")]),
+    "clinica": (
+        "Clínica e consultório",
+        [
+            ("amenity", "doctors"),
+            ("amenity", "clinic"),
+            ("healthcare", "doctor"),
+            ("healthcare", "clinic"),
+        ],
+    ),
+    "oficina": ("Oficina mecânica", [("shop", "car_repair")]),
+    "petshop": ("Pet shop", [("shop", "pet"), ("shop", "pet_grooming")]),
+    "veterinario": ("Veterinário", [("amenity", "veterinary")]),
+    "confeitaria": (
+        "Confeitaria e doceria",
+        [("shop", "pastry"), ("shop", "confectionery")],
+    ),
+    "sorveteria": ("Sorveteria", [("amenity", "ice_cream")]),
+    "otica": ("Ótica", [("shop", "optician")]),
+    "imobiliaria": ("Imobiliária", [("office", "estate_agent")]),
 }
 
 WEBSITE_TAGS = ("website", "contact:website", "url", "contact:url")

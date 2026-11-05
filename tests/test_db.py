@@ -455,3 +455,150 @@ def test_reimport_drops_a_confirmed_absence_when_the_map_gets_a_site(conn):
     db.add_leads(conn, [lead(website="https://lugar.com.br", site_state="site_informado")])
 
     assert db.list_leads(conn)[0]["site_state"] == "site_informado"
+
+
+OLD_STAGE_CHECK = "CHECK (status IN ('novo', 'contatado', 'respondeu', 'fechado', 'descartado'))"
+
+
+@pytest.fixture
+def v2_db(tmp_path):
+    path = tmp_path / "v2.db"
+    with closing(sqlite3.connect(path)) as old:
+        old.row_factory = sqlite3.Row
+        old.execute(OLD_SCHEMA)
+        db.add_presence_columns(old)
+        db.add_manual_check(old)
+        old.execute(
+            "INSERT INTO leads (id, name, segment, neighborhood, status, notes, favorite, manual_instagram)"
+            " VALUES ('node-1', 'Contatado', 'cafe', 'Saúde', 'contatado', 'Ligar sexta', 1, 'perfil')"
+        )
+        old.execute(
+            "INSERT INTO leads (id, name, segment, neighborhood, status)"
+            " VALUES ('node-2', 'Descartado', 'cafe', 'Saúde', 'descartado')"
+        )
+        old.execute("INSERT INTO status_changes (lead_id, status) VALUES ('node-1', 'contatado')")
+        old.execute("PRAGMA user_version = 2")
+        old.commit()
+    return path
+
+
+def test_prospecto_is_a_stage_between_novo_and_contatado():
+    assert db.STATUSES[:3] == ("novo", "prospecto", "contatado")
+
+
+def test_update_lead_accepts_the_prospecto_stage_and_records_it(conn):
+    db.add_leads(conn, [lead()])
+
+    saved = db.update_lead(conn, "node-1", status="prospecto")
+
+    assert saved["status"] == "prospecto"
+    history = conn.execute("SELECT status FROM status_changes WHERE lead_id = 'node-1'").fetchall()
+    assert [row["status"] for row in history] == ["prospecto"]
+
+
+def test_new_database_already_accepts_prospecto(tmp_path):
+    with closing(db.connect(tmp_path / "novo.db")) as conn:
+        sql = conn.execute("SELECT sql FROM sqlite_master WHERE name = 'leads'").fetchone()[0]
+
+    assert "'prospecto'" in sql
+
+
+def test_migration_three_lets_an_old_database_accept_prospecto(v2_db):
+    with closing(db.connect(v2_db)) as conn:
+        db.add_leads(conn, [lead("node-9")])
+        saved = db.update_lead(conn, "node-9", status="prospecto")
+        sql = conn.execute("SELECT sql FROM sqlite_master WHERE name = 'leads'").fetchone()[0]
+
+    assert saved["status"] == "prospecto"
+    assert OLD_STAGE_CHECK not in sql
+    assert "'prospecto'" in sql
+
+
+def test_migration_three_keeps_every_lead_with_its_data(v2_db):
+    with closing(db.connect(v2_db)) as conn:
+        saved = {item["id"]: item for item in db.list_leads(conn)}
+
+    assert set(saved) == {"node-1", "node-2"}
+    assert saved["node-1"]["status"] == "contatado"
+    assert saved["node-1"]["notes"] == "Ligar sexta"
+    assert saved["node-1"]["favorite"] == 1
+    assert saved["node-1"]["instagram"] == "perfil"
+    assert saved["node-2"]["status"] == "descartado"
+
+
+def test_migration_three_keeps_the_status_history_and_its_link_to_leads(v2_db):
+    with closing(db.connect(v2_db)) as conn:
+        history = conn.execute("SELECT lead_id, status FROM status_changes").fetchall()
+        tables = {row[0]: row[1] for row in conn.execute("SELECT name, sql FROM sqlite_master WHERE type = 'table'")}
+
+    assert [(row["lead_id"], row["status"]) for row in history] == [("node-1", "contatado")]
+    assert set(tables) == {"leads", "status_changes"}
+    assert "REFERENCES leads" in tables["status_changes"]
+    assert "leads_old" not in tables["status_changes"] and "leads_new" not in tables["status_changes"]
+
+
+def test_migration_three_backs_up_the_database_first(v2_db):
+    db.connect(v2_db).close()
+
+    backups = list(v2_db.parent.glob("v2.db.bak-*"))
+    assert len(backups) == 1
+    with closing(sqlite3.connect(backups[0])) as copy:
+        sql = copy.execute("SELECT sql FROM sqlite_master WHERE name = 'leads'").fetchone()[0]
+        count = copy.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+    assert OLD_STAGE_CHECK in sql
+    assert count == 2
+
+
+def test_migration_three_still_rejects_an_unknown_stage(v2_db):
+    with closing(db.connect(v2_db)) as conn:
+        with pytest.raises(sqlite3.IntegrityError):
+            db.update_lead(conn, "node-1", status="inventado")
+
+
+def test_migration_three_runs_only_once(v2_db):
+    db.connect(v2_db).close()
+    db.connect(v2_db).close()
+
+    assert len(list(v2_db.parent.glob("v2.db.bak-*"))) == 1
+    with closing(sqlite3.connect(v2_db)) as conn:
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == len(db.MIGRATIONS)
+
+
+def test_migration_three_is_atomic_when_it_fails(v2_db, monkeypatch):
+    def broken(conn):
+        conn.execute("ALTER TABLE leads RENAME TO leads_x")
+        raise RuntimeError("falhou no meio")
+
+    monkeypatch.setattr(db, "MIGRATIONS", (*db.MIGRATIONS[:2], broken))
+
+    with pytest.raises(RuntimeError):
+        db.connect(v2_db)
+
+    with closing(sqlite3.connect(v2_db)) as conn:
+        names = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        count = conn.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+        version = conn.execute("PRAGMA user_version").fetchone()[0]
+    assert names == {"leads", "status_changes"}
+    assert count == 2
+    assert version == 2
+
+
+def test_statuses_of_returns_only_the_saved_ids_with_their_stage(conn):
+    db.add_leads(conn, [lead("node-1"), lead("node-2", lat=-23.7)])
+    db.update_lead(conn, "node-2", status="prospecto")
+
+    assert db.statuses_of(conn, ["node-1", "node-2", "node-404"]) == {"node-1": "novo", "node-2": "prospecto"}
+
+
+def test_statuses_of_an_empty_list_is_empty(conn):
+    assert db.statuses_of(conn, []) == {}
+
+
+def test_same_place_needs_another_osm_type_the_same_name_and_a_short_distance():
+    node = lead("node-1", name="Cantina São José")
+
+    assert db.same_place(node, lead("way-9", name="cantina sao jose", lat=-23.5603, lon=-46.6903))
+    assert not db.same_place(node, lead("node-2", name="Cantina São José"))
+    assert not db.same_place(node, lead("way-9", name="Outro Nome"))
+    assert not db.same_place(node, lead("way-9", name="Cantina São José", lat=-23.57))
+    assert not db.same_place(node, lead("way-9", name="Cantina São José", lat=None))

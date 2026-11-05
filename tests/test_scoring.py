@@ -271,3 +271,15 @@ def test_ranked_puts_high_priority_first():
     ]
 
     assert [item["name"] for item in scoring.ranked(leads)] == ["Alta", "Normal", "Baixa"]
+
+
+@pytest.mark.parametrize("segment", ["confeitaria", "sorveteria"])
+def test_new_food_segments_get_a_digital_menu_when_they_have_no_own_site(segment):
+    assert "cardapio_digital" in offer_keys(segment=segment, site_state="sem_site_na_fonte")
+
+
+@pytest.mark.parametrize("segment", ["clinica", "oficina", "petshop", "veterinario", "otica", "imobiliaria"])
+def test_other_new_segments_get_a_landing_page_but_no_menu(segment):
+    keys = offer_keys(segment=segment, site_state="sem_site_na_fonte")
+
+    assert keys == ["landing_page"]

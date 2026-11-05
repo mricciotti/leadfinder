@@ -1,6 +1,7 @@
 import os
 from contextlib import closing
 from datetime import date
+from uuid import uuid4
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -18,6 +19,8 @@ import places
 import scoring
 
 INDEX = Path(__file__).parent / "static" / "index.html"
+MAX_PREVIEWS = 10
+RECOMMENDED_SITE_STATES = ("sem_site_na_fonte", "so_rede_social")
 
 
 class SearchIn(BaseModel):
@@ -40,6 +43,44 @@ class LeadFilter(BaseModel):
     instagram: bool = False
     favorite: bool = False
     not_contacted: bool = False
+
+
+class SaveIn(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=5000)
+
+
+def is_recommended(lead):
+    return (
+        not lead["saved"]
+        and not lead["duplicate"]
+        and lead["evaluation"]["contact"]["channel"]
+        and lead["site_state"] in RECOMMENDED_SITE_STATES
+    )
+
+
+def build_preview(conn, leads):
+    saved = db.statuses_of(conn, [lead["id"] for lead in leads])
+    shown = []
+    kept = []
+    for lead in leads:
+        known = lead["id"] in saved
+        duplicate = not known and (
+            db.same_place_elsewhere(conn, lead)
+            or any(db.same_place(lead, other) for other in kept)
+        )
+        if not known and not duplicate:
+            kept.append(lead)
+        shown.append(
+            {
+                **lead,
+                "manual_whatsapp": None,
+                "saved": known,
+                "saved_status": saved.get(lead["id"]),
+                "duplicate": duplicate,
+            }
+        )
+    ranked = scoring.ranked(shown)
+    return [{**lead, "recommended": bool(is_recommended(lead))} for lead in ranked]
 
 
 def checked_phone(value, kinds):
@@ -112,6 +153,7 @@ class UpdateIn(BaseModel):
 
 def create_app(db_path, searcher=overpass.search):
     app = FastAPI()
+    previews = {}
 
     def filtered_leads(wanted):
         with closing(db.connect(db_path)) as conn:
@@ -183,15 +225,39 @@ def create_app(db_path, searcher=overpass.search):
                 "O OpenStreetMap não respondeu, mesmo depois de algumas tentativas. Espere um minuto e tente de novo.",
             )
         with closing(db.connect(db_path)) as conn:
-            added = db.add_leads(conn, result["leads"])
+            shown = build_preview(conn, result["leads"])
+        search_id = uuid4().hex
+        previews[search_id] = {lead["id"]: lead for lead in result["leads"]}
+        while len(previews) > MAX_PREVIEWS:
+            del previews[next(iter(previews))]
         return {
+            "search_id": search_id,
             "total": result["total"],
-            "found": len(result["leads"]),
+            "found": len(shown),
+            "new": sum(not lead["saved"] and not lead["duplicate"] for lead in shown),
+            "known": sum(lead["saved"] for lead in shown),
+            "duplicates": sum(lead["duplicate"] for lead in shown),
             "without_site": sum(
-                lead["site_state"] == "sem_site_na_fonte" for lead in result["leads"]
+                lead["site_state"] == "sem_site_na_fonte" for lead in shown
             ),
-            "added": added,
+            "recommended": sum(lead["recommended"] for lead in shown),
+            "leads": shown,
         }
+
+    @app.post("/api/search/{search_id}/save")
+    def save_search(search_id: str, body: SaveIn):
+        found = previews.get(search_id)
+        if found is None:
+            raise HTTPException(404, "A prévia expirou. Faça a busca de novo.")
+        if any(lead_id not in found for lead_id in body.ids):
+            raise HTTPException(400, "Algum lead escolhido não faz parte desta busca.")
+        with closing(db.connect(db_path)) as conn:
+            saved = db.statuses_of(conn, list(found))
+            chosen = [found[lead_id] for lead_id in dict.fromkeys(body.ids) if lead_id not in saved]
+            refreshed = [lead for lead_id, lead in found.items() if lead_id in saved]
+            added = db.add_leads(conn, chosen + refreshed)
+        del previews[search_id]
+        return {"added": added, "refreshed": len(refreshed)}
 
     @app.patch("/api/leads/{lead_id}")
     def update_lead(lead_id: str, body: UpdateIn):

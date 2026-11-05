@@ -256,6 +256,13 @@ h1 {
   padding: 1rem 1.25rem;
 }
 
+.toolbar-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .card-title {
   margin: 0;
   font-size: 1rem;
@@ -308,12 +315,45 @@ select option {
 
 .field-hint {
   min-height: 1.1em;
+  margin: 0.6rem 0 0;
+  color: var(--muted);
   font-size: 12px;
-  font-weight: 400;
 }
 
-.areas {
+.areas,
+.preview {
   margin-top: 1rem;
+}
+
+.preview-head {
+  padding: 1rem 1.25rem 0.75rem;
+}
+
+.preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.preview-actions .spacer {
+  flex: 1;
+}
+
+.preview tbody tr.dim {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.preview .check-col {
+  width: 2.5rem;
+  padding-right: 0;
+}
+
+.preview .check-col input {
+  width: auto;
+  accent-color: var(--accent);
 }
 
 .areas-head {
@@ -931,7 +971,7 @@ tbody tr:last-child td {
     <section class="view" id="view-buscar" hidden>
     <div class="card search" aria-label="Buscar no mapa">
       <h2 class="card-title">Buscar novos leads no mapa</h2>
-      <p class="card-hint">Vai ao OpenStreetMap e traz negócios que ainda não estão na sua lista. Se o servidor estiver ocupado, tento de novo sozinho, e isso pode levar alguns minutos.</p>
+      <p class="card-hint">Vai ao OpenStreetMap e mostra os negócios que encontrar. Nada é salvo até você escolher. Se o servidor estiver ocupado, tento de novo sozinho, e isso pode levar alguns minutos.</p>
       <form id="search-form">
         <label>Segmento
           <select id="segment"></select>
@@ -939,23 +979,29 @@ tbody tr:last-child td {
         <label>Bairro
           <input id="neighborhood" list="neighborhood-options" required minlength="2" placeholder="Escolha ou digite" autocomplete="off">
           <datalist id="neighborhood-options"></datalist>
-          <span class="field-hint" id="neighborhood-hint"></span>
         </label>
         <label>Cidade
           <input id="city" value="São Paulo" autocomplete="off">
         </label>
         <button id="search-button" class="btn primary" type="submit">Buscar leads</button>
       </form>
+      <p class="field-hint" id="neighborhood-hint"></p>
       <div id="progress" class="progress" hidden><span></span></div>
     </div>
+    <div class="card preview" id="preview" hidden></div>
     <div class="card areas" id="areas"></div>
     </section>
 
     <section class="stats" id="stats" aria-label="Resumo"></section>
 
     <section class="card toolbar" id="toolbar" aria-label="Filtros">
-      <h2 class="card-title">Filtrar a sua lista</h2>
-      <p class="card-hint">Não faz busca nova: só mostra, entre os leads já salvos, os que combinam com o que você escolher.</p>
+      <div class="toolbar-head">
+        <div>
+          <h2 class="card-title">Filtrar a sua lista</h2>
+          <p class="card-hint">Não faz busca nova: só mostra, entre os leads já salvos, os que combinam com o que você escolher.</p>
+        </div>
+        <button id="clear-filters" class="btn small" type="button" hidden>Limpar filtros</button>
+      </div>
       <div class="filters">
         <label>Segmento
           <select id="filter-segment" data-filter="segment"></select>
@@ -1021,6 +1067,7 @@ tbody tr:last-child td {
 <script>
 const STAGES = [
   ["novo", "Novos"],
+  ["prospecto", "Possíveis prospectos"],
   ["contatado", "Contatados"],
   ["respondeu", "Responderam"],
   ["fechado", "Fechados"],
@@ -1028,6 +1075,7 @@ const STAGES = [
 ];
 const STATUS_LABELS = {
   novo: "Novo",
+  prospecto: "Possível prospecto",
   contatado: "Contatado",
   respondeu: "Respondeu",
   fechado: "Fechado",
@@ -1035,6 +1083,7 @@ const STATUS_LABELS = {
 };
 const STATUS_TONES = {
   novo: "tone-info",
+  prospecto: "tone-accent",
   contatado: "tone-warn",
   respondeu: "tone-accent",
   fechado: "tone-good",
@@ -1069,6 +1118,7 @@ const SITE_TONES = {
   site_inacessivel: "tone-bad",
   ausencia_confirmada: "tone-accent",
 };
+const NOT_APPROACHED = ["novo", "prospecto"];
 const NO_OWN_SITE = ["sem_site_na_fonte", "so_rede_social", "ausencia_confirmada"];
 const VIEWS = {
   buscar: ["Buscar", "Procure negócios novos no mapa e veja o que você já buscou."],
@@ -1099,6 +1149,8 @@ const MANUAL_FIELDS = [
 const state = {
   view: "leads",
   areas: [],
+  preview: null,
+  saving: false,
   leads: [],
   sheet: { columns: [], ids: [], rows: [] },
   segments: {},
@@ -1288,6 +1340,7 @@ async function updateLead(id, patch, reload = true) {
     });
     state.leads = state.leads.map((lead) => (lead.id === id ? updated : lead));
     if (state.open && state.open.id === id) state.open = updated;
+    if ($("message").className === "error") showMessage("");
     if (reload) {
       await refresh();
       renderDrawer();
@@ -1332,7 +1385,7 @@ function renderStats() {
     [leads.length, "Leads (todas as etapas)"],
     [count((lead) => lead.evaluation.priority.level === "alta"), "Prioridade alta"],
     [count((lead) => NO_OWN_SITE.includes(lead.site_state)), "Sem site próprio"],
-    [count((lead) => lead.status !== "novo"), "Já abordados"],
+    [count((lead) => !NOT_APPROACHED.includes(lead.status)), "Já abordados"],
   ];
   $("stats").replaceChildren(
     ...items.map(([value, label]) =>
@@ -1362,6 +1415,9 @@ function renderFilters() {
     if (control.type === "checkbox") control.checked = value;
     else control.value = value;
   });
+  const active = Object.values(state.filter).filter(Boolean).length;
+  $("clear-filters").hidden = active === 0;
+  $("clear-filters").textContent = `Limpar filtros (${active})`;
 }
 
 function renderStages() {
@@ -1731,6 +1787,157 @@ function renderAreas() {
   );
 }
 
+function previewSummary(preview) {
+  const parts = [
+    `${plural(preview.total, "lugar", "lugares")} no mapa`,
+    `${plural(preview.new, "novo", "novos")}`,
+  ];
+  if (preview.known) parts.push(`${preview.known} já na sua lista`);
+  if (preview.duplicates) parts.push(`${plural(preview.duplicates, "repetido", "repetidos")}`);
+  return `${parts.join(", ")}. Marquei os ${preview.recommended} com canal de contato e sem site próprio. Nada foi salvo ainda.`;
+}
+
+function previewRow(lead) {
+  const preview = state.preview;
+  const segmentLabel = state.segments[lead.segment] || lead.segment;
+  const locked = lead.saved || lead.duplicate;
+  const checkbox = h("input", {
+    type: "checkbox",
+    "aria-label": `Salvar ${lead.name}`,
+    "data-id": lead.id,
+    checked: preview.selected.has(lead.id),
+    disabled: locked,
+    onchange: (event) => {
+      if (event.target.checked) preview.selected.add(lead.id);
+      else preview.selected.delete(lead.id);
+      renderPreview();
+    },
+  });
+  const note = lead.saved
+    ? badge(`Já na lista · ${STATUS_LABELS[lead.saved_status] || lead.saved_status}`, "", true)
+    : lead.duplicate
+      ? badge("Repetido", "", true)
+      : null;
+  return h(
+    "tr",
+    { "data-id": lead.id, class: locked ? "dim" : "" },
+    h("td", { class: "check-col" }, checkbox),
+    h(
+      "td",
+      {},
+      h("span", { class: "name" }, lead.name),
+      h("div", { class: "sub" }, `${segmentLabel} · ${lead.neighborhood}`),
+      note
+    ),
+    contactCell(lead),
+    h("td", {}, siteBadge(lead)),
+    h("td", {}, offerPills(lead)),
+    h("td", {}, priorityBadge(lead))
+  );
+}
+
+function newFirst(leads) {
+  return [...leads].sort((a, b) => (a.saved || a.duplicate) - (b.saved || b.duplicate));
+}
+
+function selectableIds() {
+  return state.preview.leads.filter((lead) => !lead.saved && !lead.duplicate).map((lead) => lead.id);
+}
+
+function setSelection(ids) {
+  state.preview.selected = new Set(ids);
+  renderPreview();
+}
+
+function renderPreview() {
+  const preview = state.preview;
+  $("preview").hidden = !preview;
+  if (!preview) return;
+  const chosen = preview.selected.size;
+  const recommended = preview.leads.filter((lead) => lead.recommended).map((lead) => lead.id);
+  const save = h(
+    "button",
+    {
+      type: "button",
+      class: "btn primary",
+      id: "preview-save",
+      disabled: chosen === 0 || state.saving,
+      onclick: savePreview,
+    },
+    chosen ? `Salvar ${plural(chosen, "selecionado", "selecionados")}` : "Nada selecionado"
+  );
+  const head = h(
+    "div",
+    { class: "preview-head" },
+    h("h2", { class: "card-title" }, "Resultado da busca"),
+    h("p", { class: "card-hint", id: "preview-summary" }, previewSummary(preview)),
+    h(
+      "div",
+      { class: "preview-actions" },
+      h("button", { type: "button", class: "btn small", id: "pick-recommended", onclick: () => setSelection(recommended) }, `Marcar recomendados (${recommended.length})`),
+      h("button", { type: "button", class: "btn small", id: "pick-all", onclick: () => setSelection(selectableIds()) }, `Marcar todos os novos (${selectableIds().length})`),
+      h("button", { type: "button", class: "btn small", id: "pick-none", onclick: () => setSelection([]) }, "Desmarcar todos"),
+      h("span", { class: "spacer" }),
+      h("button", { type: "button", class: "btn", id: "preview-discard", onclick: discardPreview }, "Descartar resultado"),
+      save
+    )
+  );
+  const headers = ["", "Negócio", "Contato", "Site", "Oferecer", "Prioridade"];
+  $("preview").replaceChildren(
+    head,
+    preview.leads.length
+      ? h(
+          "div",
+          { class: "table-wrap" },
+          h(
+            "table",
+            {},
+            h("thead", {}, h("tr", {}, ...headers.map((title) => h("th", {}, title)))),
+            h("tbody", {}, ...newFirst(preview.leads).map(previewRow))
+          )
+        )
+      : h("div", { class: "empty" }, "O mapa não trouxe nenhum lugar nessa área.")
+  );
+}
+
+function discardPreview() {
+  state.preview = null;
+  renderPreview();
+  showMessage("Resultado descartado. Nada foi salvo.");
+}
+
+async function savePreview() {
+  const preview = state.preview;
+  if (!preview || preview.selected.size === 0 || state.saving) return;
+  state.saving = true;
+  renderPreview();
+  try {
+    const result = await api(`/api/search/${enc(preview.search_id)}/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: [...preview.selected] }),
+    });
+    state.preview = null;
+    await loadOptions();
+    state.stage = "novo";
+    state.filter = {
+      ...EMPTY_FILTER,
+      segment: matchOption(state.options.segments, preview.segment),
+      neighborhood: matchOption(state.options.neighborhoods, preview.neighborhood),
+    };
+    state.view = "leads";
+    history.replaceState(null, "", "#leads");
+    await refresh();
+    const refreshed = result.refreshed ? `, ${plural(result.refreshed, "atualizado", "atualizados")}` : "";
+    showMessage(`${plural(result.added, "lead salvo", "leads salvos")}${refreshed}.`);
+  } catch (error) {
+    showMessage(error.message, true);
+  } finally {
+    state.saving = false;
+    renderPreview();
+  }
+}
+
 function seeArea(area) {
   state.stage = "";
   state.filter = {
@@ -1758,7 +1965,10 @@ function renderView() {
   $("head-actions").hidden = searching;
   $("stats").hidden = searching;
   $("toolbar").hidden = searching;
-  if (searching) renderAreas();
+  if (searching) {
+    renderPreview();
+    renderAreas();
+  }
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.setAttribute("aria-current", button.dataset.view === state.view ? "page" : "false");
   });
@@ -1820,6 +2030,11 @@ document.querySelectorAll("[data-view]").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.view));
 });
 
+$("clear-filters").addEventListener("click", () => {
+  state.filter = { ...EMPTY_FILTER };
+  refresh().catch((error) => showMessage(error.message, true));
+});
+
 $("city").addEventListener("change", () => {
   loadNeighborhoods();
 });
@@ -1849,18 +2064,20 @@ $("search-form").addEventListener("submit", async (event) => {
       }),
     });
     await loadOptions();
-    state.stage = "novo";
-    state.filter = {
-      ...EMPTY_FILTER,
-      segment: matchOption(state.options.segments, $("segment").value),
-      neighborhood: matchOption(state.options.neighborhoods, $("neighborhood").value),
+    state.preview = {
+      ...result,
+      segment: $("segment").value,
+      neighborhood: $("neighborhood").value.trim(),
+      selected: new Set(result.leads.filter((lead) => lead.recommended).map((lead) => lead.id)),
     };
-    state.view = "leads";
-    history.replaceState(null, "", "#leads");
-    await refresh();
+    renderPreview();
     showMessage(
-      `${plural(result.total, "lugar", "lugares")} no mapa, ${result.without_site} sem site cadastrado, ${plural(result.added, "novo", "novos")} na sua lista.`
+      result.new
+        ? "Escolha quais leads salvar. O que você não salvar não entra na sua lista."
+        : "Não há leads novos nessa área."
     );
+    const target = $("preview");
+    if (target.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (error) {
     showMessage(error.message, true);
   } finally {

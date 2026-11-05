@@ -1,4 +1,5 @@
 import contacts
+import db
 
 SITE_FILTERS = {
     "com_site": ("site_informado", "site_ok", "site_com_problemas", "site_inacessivel"),
@@ -41,7 +42,7 @@ def matches(lead, wanted):
         return False
     if wanted["favorite"] and not lead["favorite"]:
         return False
-    if wanted["not_contacted"] and lead["status"] != "novo":
+    if wanted["not_contacted"] and lead["status"] not in db.NOT_APPROACHED:
         return False
     return True
 
@@ -98,7 +99,7 @@ def areas(leads):
         area["total"] += 1
         if lead["evaluation"]["priority"]["level"] == "alta":
             area["high_priority"] += 1
-        if lead["status"] != "novo":
+        if lead["status"] not in db.NOT_APPROACHED:
             area["contacted"] += 1
         area["last_seen"] = max(area["last_seen"], lead["source_seen_at"] or "")
     return sorted(found.values(), key=lambda area: area["last_seen"], reverse=True)

@@ -1,6 +1,14 @@
 import contacts
 
-FOOD_SEGMENTS = {"restaurante", "lanchonete", "bar", "cafe", "padaria"}
+FOOD_SEGMENTS = {
+    "restaurante",
+    "lanchonete",
+    "bar",
+    "cafe",
+    "padaria",
+    "confeitaria",
+    "sorveteria",
+}
 
 CONTACT_POINTS = {
     "celular": 3,
