@@ -1,4 +1,5 @@
 import json
+import re
 import sqlite3
 from contextlib import closing
 from datetime import datetime
@@ -18,6 +19,13 @@ SITE_STATES = (
 SAME_PLACE_DEGREES = 0.0005
 MANUAL_FIELDS = ("manual_phone", "manual_whatsapp", "manual_instagram", "manual_website")
 EDITABLE = ("status", "notes", "favorite", *MANUAL_FIELDS)
+SLUG_RE = re.compile(r"^[a-z0-9-]{3,60}$")
+LEAD_SELECT = """
+SELECT leads.*,
+    (SELECT MAX(changed_at) FROM status_changes
+     WHERE lead_id = leads.id AND status = 'contatado') AS contacted_at
+FROM leads
+"""
 
 
 def sql_list(values):
@@ -143,7 +151,26 @@ def allow_prospect_stage(conn):
     conn.execute("ALTER TABLE leads_new RENAME TO leads")
 
 
-MIGRATIONS = (add_presence_columns, add_manual_check, allow_prospect_stage)
+def add_outreach(conn):
+    conn.execute("ALTER TABLE leads ADD COLUMN follow_up_at TEXT")
+    conn.execute("ALTER TABLE leads ADD COLUMN do_not_contact_at TEXT")
+    conn.execute(
+        """
+        CREATE TABLE vitrines (
+            id INTEGER PRIMARY KEY,
+            lead_id TEXT NOT NULL UNIQUE REFERENCES leads (id),
+            slug TEXT NOT NULL UNIQUE CHECK (length(slug) BETWEEN 3 AND 60),
+            content TEXT NOT NULL DEFAULT '{}',
+            approved INTEGER NOT NULL DEFAULT 0 CHECK (approved IN (0, 1)),
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            exported_at TEXT
+        )
+        """
+    )
+
+
+MIGRATIONS = (add_presence_columns, add_manual_check, allow_prospect_stage, add_outreach)
 
 
 def schema_version(conn):
@@ -258,13 +285,20 @@ def add_leads(conn, leads):
 
 def list_leads(conn):
     rows = conn.execute(
-        "SELECT * FROM leads ORDER BY score DESC, name COLLATE NOCASE"
+        LEAD_SELECT + " ORDER BY score DESC, name COLLATE NOCASE"
     ).fetchall()
     return [to_lead(row) for row in rows]
 
 
+def get_lead(conn, lead_id):
+    row = conn.execute(LEAD_SELECT + " WHERE leads.id = ?", (lead_id,)).fetchone()
+    return to_lead(row) if row else None
+
+
 def update_lead(conn, lead_id, **changes):
     absence = changes.pop("absence_confirmed", None)
+    do_not_contact = changes.pop("do_not_contact", None)
+    follow_up_sent = changes.pop("follow_up_sent", None)
     unknown = set(changes) - set(EDITABLE)
     if unknown:
         raise ValueError(f"Campos desconhecidos: {sorted(unknown)}")
@@ -283,6 +317,12 @@ def update_lead(conn, lead_id, **changes):
     assignments = [f"{key} = ?" for key in values] + [
         f"{key} = CURRENT_TIMESTAMP" for key in stamped
     ]
+    if do_not_contact is True:
+        assignments.append("do_not_contact_at = COALESCE(do_not_contact_at, CURRENT_TIMESTAMP)")
+    elif do_not_contact is False:
+        assignments.append("do_not_contact_at = NULL")
+    if follow_up_sent is True:
+        assignments.append("follow_up_at = COALESCE(follow_up_at, CURRENT_TIMESTAMP)")
     if assignments:
         conn.execute(
             f"UPDATE leads SET {', '.join(assignments)} WHERE id = ?",
@@ -294,5 +334,59 @@ def update_lead(conn, lead_id, **changes):
             (lead_id, changes["status"]),
         )
     conn.commit()
-    row = conn.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
-    return to_lead(row)
+    return get_lead(conn, lead_id)
+
+
+def vitrine_from(row):
+    if row is None:
+        return None
+    vitrine = dict(row)
+    vitrine["content"] = json.loads(vitrine["content"])
+    vitrine["approved"] = bool(vitrine["approved"])
+    return vitrine
+
+
+def vitrine_of_lead(conn, lead_id):
+    return vitrine_from(conn.execute("SELECT * FROM vitrines WHERE lead_id = ?", (lead_id,)).fetchone())
+
+
+def vitrine_by_slug(conn, slug):
+    if not SLUG_RE.match(slug):
+        return None
+    return vitrine_from(conn.execute("SELECT * FROM vitrines WHERE slug = ?", (slug,)).fetchone())
+
+
+def vitrine_slugs(conn):
+    return {row["slug"] for row in conn.execute("SELECT slug FROM vitrines")}
+
+
+def vitrine_slug_by_lead(conn):
+    return {row["lead_id"]: row["slug"] for row in conn.execute("SELECT lead_id, slug FROM vitrines")}
+
+
+def create_vitrine(conn, lead_id, slug):
+    if not SLUG_RE.match(slug):
+        raise ValueError("Slug fora do padrão.")
+    conn.execute("INSERT INTO vitrines (lead_id, slug) VALUES (?, ?)", (lead_id, slug))
+    conn.commit()
+    return vitrine_of_lead(conn, lead_id)
+
+
+def update_vitrine(conn, slug, content=None, approved=None):
+    assignments = ["updated_at = CURRENT_TIMESTAMP"]
+    values = []
+    if content is not None:
+        assignments.append("content = ?")
+        values.append(json.dumps(content, ensure_ascii=False))
+    if approved is not None:
+        assignments.append("approved = ?")
+        values.append(int(approved))
+    conn.execute(f"UPDATE vitrines SET {', '.join(assignments)} WHERE slug = ?", (*values, slug))
+    conn.commit()
+    return vitrine_by_slug(conn, slug)
+
+
+def mark_exported(conn, slug):
+    conn.execute("UPDATE vitrines SET exported_at = CURRENT_TIMESTAMP WHERE slug = ?", (slug,))
+    conn.commit()
+    return vitrine_by_slug(conn, slug)

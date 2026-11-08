@@ -532,7 +532,7 @@ def test_migration_three_keeps_the_status_history_and_its_link_to_leads(v2_db):
         tables = {row[0]: row[1] for row in conn.execute("SELECT name, sql FROM sqlite_master WHERE type = 'table'")}
 
     assert [(row["lead_id"], row["status"]) for row in history] == [("node-1", "contatado")]
-    assert set(tables) == {"leads", "status_changes"}
+    assert set(tables) == {"leads", "status_changes", "vitrines"}
     assert "REFERENCES leads" in tables["status_changes"]
     assert "leads_old" not in tables["status_changes"] and "leads_new" not in tables["status_changes"]
 
@@ -602,3 +602,147 @@ def test_same_place_needs_another_osm_type_the_same_name_and_a_short_distance():
     assert not db.same_place(node, lead("way-9", name="Outro Nome"))
     assert not db.same_place(node, lead("way-9", name="Cantina São José", lat=-23.57))
     assert not db.same_place(node, lead("way-9", name="Cantina São José", lat=None))
+
+
+@pytest.fixture
+def v3_db(tmp_path):
+    path = tmp_path / "v3.db"
+    with closing(sqlite3.connect(path)) as old:
+        old.row_factory = sqlite3.Row
+        old.execute(OLD_SCHEMA)
+        db.add_presence_columns(old)
+        db.add_manual_check(old)
+        db.allow_prospect_stage(old)
+        old.execute(
+            "INSERT INTO leads (id, name, segment, neighborhood, status, notes, favorite)"
+            " VALUES ('node-1', 'Contatado', 'cafe', 'Saúde', 'contatado', 'Ligar sexta', 1)"
+        )
+        old.execute("INSERT INTO status_changes (lead_id, status, changed_at) VALUES ('node-1', 'contatado', '2026-11-01 12:00:00')")
+        old.execute("PRAGMA user_version = 3")
+        old.commit()
+    return path
+
+
+def test_migration_four_adds_the_outreach_columns_and_table_without_losing_data(v3_db):
+    with closing(db.connect(v3_db)) as conn:
+        saved = db.list_leads(conn)[0]
+        tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+
+    assert (saved["id"], saved["status"], saved["notes"], saved["favorite"]) == ("node-1", "contatado", "Ligar sexta", 1)
+    assert saved["follow_up_at"] is None and saved["do_not_contact_at"] is None
+    assert saved["contacted_at"] == "2026-11-01 12:00:00"
+    assert "vitrines" in tables
+
+
+def test_migration_four_backs_up_the_database_first(v3_db):
+    db.connect(v3_db).close()
+
+    backups = list(v3_db.parent.glob("v3.db.bak-*"))
+    assert len(backups) == 1
+    with closing(sqlite3.connect(backups[0])) as copy:
+        tables = {row[0] for row in copy.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+    assert "vitrines" not in tables
+
+
+def test_new_leads_have_no_follow_up_or_do_not_contact_date(conn):
+    db.add_leads(conn, [lead()])
+
+    saved = db.list_leads(conn)[0]
+
+    assert (saved["follow_up_at"], saved["do_not_contact_at"], saved["contacted_at"]) == (None, None, None)
+
+
+def test_contacted_at_is_the_latest_time_the_lead_became_contacted(conn):
+    db.add_leads(conn, [lead()])
+    conn.execute("INSERT INTO status_changes (lead_id, status, changed_at) VALUES ('node-1', 'contatado', '2026-11-01 10:00:00')")
+    conn.execute("INSERT INTO status_changes (lead_id, status, changed_at) VALUES ('node-1', 'novo', '2026-11-02 10:00:00')")
+    conn.execute("INSERT INTO status_changes (lead_id, status, changed_at) VALUES ('node-1', 'contatado', '2026-11-03 10:00:00')")
+
+    assert db.get_lead(conn, "node-1")["contacted_at"] == "2026-11-03 10:00:00"
+
+
+def test_do_not_contact_is_dated_and_reversible(conn):
+    db.add_leads(conn, [lead()])
+
+    marked = db.update_lead(conn, "node-1", do_not_contact=True)
+    first_date = marked["do_not_contact_at"]
+    again = db.update_lead(conn, "node-1", do_not_contact=True)
+    undone = db.update_lead(conn, "node-1", do_not_contact=False)
+
+    assert first_date
+    assert again["do_not_contact_at"] == first_date
+    assert undone["do_not_contact_at"] is None
+
+
+def test_follow_up_sent_is_recorded_only_once(conn):
+    db.add_leads(conn, [lead()])
+    conn.execute("UPDATE leads SET follow_up_at = '2026-11-01 10:00:00'")
+
+    saved = db.update_lead(conn, "node-1", follow_up_sent=True)
+
+    assert saved["follow_up_at"] == "2026-11-01 10:00:00"
+
+
+def test_follow_up_sent_is_dated_the_first_time(conn):
+    db.add_leads(conn, [lead()])
+
+    assert db.update_lead(conn, "node-1", follow_up_sent=True)["follow_up_at"]
+
+
+def test_reimport_keeps_do_not_contact_and_follow_up(conn):
+    db.add_leads(conn, [lead()])
+    db.update_lead(conn, "node-1", do_not_contact=True, follow_up_sent=True)
+
+    db.add_leads(conn, [lead(name="Lugar Novo")])
+
+    saved = db.list_leads(conn)[0]
+    assert saved["name"] == "Lugar Novo"
+    assert saved["do_not_contact_at"] and saved["follow_up_at"]
+
+
+def test_vitrine_is_created_found_updated_and_marked_exported(conn):
+    db.add_leads(conn, [lead()])
+
+    created = db.create_vitrine(conn, "node-1", "lugar-pinheiros")
+    updated = db.update_vitrine(conn, "lugar-pinheiros", content={"hours": "10h às 20h"}, approved=True)
+    exported = db.mark_exported(conn, "lugar-pinheiros")
+
+    assert (created["slug"], created["approved"], created["content"]) == ("lugar-pinheiros", False, {})
+    assert (updated["content"], updated["approved"]) == ({"hours": "10h às 20h"}, True)
+    assert exported["exported_at"]
+    assert db.vitrine_of_lead(conn, "node-1")["slug"] == "lugar-pinheiros"
+    assert db.vitrine_by_slug(conn, "lugar-pinheiros")["lead_id"] == "node-1"
+    assert db.vitrine_slugs(conn) == {"lugar-pinheiros"}
+    assert db.vitrine_slug_by_lead(conn) == {"node-1": "lugar-pinheiros"}
+
+
+def test_vitrine_slug_and_lead_are_unique(conn):
+    db.add_leads(conn, [lead("node-1"), lead("node-2", lat=-23.7)])
+    db.create_vitrine(conn, "node-1", "lugar")
+
+    with pytest.raises(sqlite3.IntegrityError):
+        db.create_vitrine(conn, "node-2", "lugar")
+    with pytest.raises(sqlite3.IntegrityError):
+        db.create_vitrine(conn, "node-1", "outro")
+
+
+@pytest.mark.parametrize("slug", ["../x", "ab", "a" * 61, "COM-MAIUSCULA", "com espaco", "com/barra", ""])
+def test_vitrine_lookup_rejects_slugs_outside_the_pattern(conn, slug):
+    assert db.vitrine_by_slug(conn, slug) is None
+
+
+def test_vitrine_table_refuses_a_slug_outside_the_length_limits(conn):
+    db.add_leads(conn, [lead()])
+
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute("INSERT INTO vitrines (lead_id, slug) VALUES ('node-1', 'ab')")
+
+
+@pytest.mark.parametrize("slug", ["ab", "../x", "COM-MAIUSCULA", "com/barra", "a" * 61])
+def test_create_vitrine_refuses_a_slug_outside_the_pattern_before_touching_the_table(conn, slug):
+    db.add_leads(conn, [lead()])
+
+    with pytest.raises(ValueError):
+        db.create_vitrine(conn, "node-1", slug)
+
+    assert conn.execute("SELECT COUNT(*) FROM vitrines").fetchone()[0] == 0

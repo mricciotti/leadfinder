@@ -3,3 +3,5 @@ leads.db.bak-*
 __pycache__/
 .pytest_cache/
 .venv/
+vitrines_publicadas/
+clientes/

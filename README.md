@@ -20,10 +20,22 @@ Linux ou macOS: troque a segunda linha por `source .venv/bin/activate`.
 
 A interface fica em `http://localhost:8000`. O banco é o `leads.db`, na pasta do projeto (a variável `LEADFINDER_DB` muda o caminho). Quando o esquema muda, o banco é copiado antes para `leads.db.bak-AAAAMMDD-HHMMSS`.
 
+## Vitrine e abordagem
+
+No painel de cada lead, "Criar vitrine" gera uma página de prévia com o nome do negócio, e o painel monta a mensagem de abordagem com o link, que você edita, copia ou abre no WhatsApp. "Enviei" move o lead para contatado. O topo mostra quantos leads você abordou hoje (limite de 15), e o filtro "Fila" lista quem abordar hoje e quem precisa de follow-up (3 dias depois). A prévia usa conteúdo de exemplo marcado "MODELO" até você preencher os dados reais.
+
+Variáveis de ambiente opcionais:
+
+- `LEADFINDER_VITRINE_BASE`: endereço público onde a pasta exportada é hospedada (sem ele, só existe a prévia local em `/s/slug`).
+- `LEADFINDER_VITRINES_DIR`: pasta das vitrines exportadas (padrão `vitrines_publicadas`).
+- `LEADFINDER_CLIENTES_DIR`: pasta do cliente para personalizar no Claude Code (padrão `clientes`).
+
 Arquitetura, decisões, limites e regras de trabalho estão no [CLAUDE.md](CLAUDE.md).
 
 ## Créditos
 
 Dados de negócios e de bairros: © colaboradores do OpenStreetMap, licença ODbL (https://www.openstreetmap.org/copyright). A lista de bairros de São Paulo fica em `bairros_sp.json` e se atualiza com `python places.py`.
+
+Fontes da vitrine: Barlow Condensed e DM Sans (SIL Open Font License, via Google Fonts). Fotos ilustrativas: Unsplash (https://unsplash.com/license).
 
 Algumas regras de limpeza de URL e de reconhecimento de redes sociais foram adaptadas das ideias do [google-maps-scraper-kit](https://github.com/Mahanaicoach/google-maps-scraper-kit) (licença MIT). O mecanismo de coleta dele não é usado aqui.

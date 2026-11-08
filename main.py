@@ -7,16 +7,19 @@ from typing import Annotated, Literal
 
 import httpx
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel, Field, field_validator
 
 import contacts
 import db
 import export
 import filters
+import mensagens
+import outreach
 import overpass
 import places
 import scoring
+import vitrines
 
 INDEX = Path(__file__).parent / "static" / "index.html"
 MAX_PREVIEWS = 10
@@ -43,6 +46,27 @@ class LeadFilter(BaseModel):
     instagram: bool = False
     favorite: bool = False
     not_contacted: bool = False
+    queue: Literal["hoje", "follow_up"] | None = None
+
+
+class ServiceIn(BaseModel):
+    name: str = Field(max_length=60)
+    text: str = Field(default="", max_length=160)
+
+
+class MenuItemIn(BaseModel):
+    name: str = Field(max_length=60)
+    price: str = Field(default="", max_length=20)
+
+
+class VitrineIn(BaseModel):
+    name: str | None = Field(default=None, max_length=80)
+    category: str | None = Field(default=None, max_length=40)
+    address: str | None = Field(default=None, max_length=160)
+    hours: str | None = Field(default=None, max_length=120)
+    services: list[ServiceIn] | None = Field(default=None, max_length=8)
+    menu: list[MenuItemIn] | None = Field(default=None, max_length=40)
+    approved: bool | None = None
 
 
 class SaveIn(BaseModel):
@@ -101,6 +125,8 @@ class UpdateIn(BaseModel):
     manual_whatsapp: str | None = Field(default=None, max_length=40)
     manual_instagram: str | None = Field(default=None, max_length=200)
     manual_website: str | None = Field(default=None, max_length=500)
+    do_not_contact: bool | None = None
+    follow_up_sent: bool | None = None
 
     @field_validator("status")
     @classmethod
@@ -151,14 +177,64 @@ class UpdateIn(BaseModel):
         return result
 
 
-def create_app(db_path, searcher=overpass.search):
+def clean_base(value):
+    url = contacts.normalize_url(value) if value else None
+    return url.rstrip("/") if url else None
+
+
+def create_app(
+    db_path,
+    searcher=overpass.search,
+    *,
+    now=outreach.utc_now,
+    vitrines_dir="vitrines_publicadas",
+    clientes_dir="clientes",
+    public_base=None,
+):
     app = FastAPI()
     previews = {}
+    base_url = clean_base(public_base)
 
     def filtered_leads(wanted):
+        current = now()
         with closing(db.connect(db_path)) as conn:
             leads = db.list_leads(conn)
-        return filters.apply(scoring.ranked(leads), wanted.model_dump())
+            slugs = db.vitrine_slug_by_lead(conn)
+            remaining = outreach.today(conn, current)["remaining"]
+        ranked = scoring.ranked(leads)
+        for lead in ranked:
+            lead["vitrine_slug"] = slugs.get(lead["id"])
+            lead["follow_up_due"] = outreach.follow_up_due(lead, current)
+        chosen = filters.apply(ranked, wanted.model_dump())
+        if wanted.queue == "hoje":
+            return outreach.daily_queue(chosen, remaining)
+        if wanted.queue == "follow_up":
+            return outreach.follow_ups(chosen, current)
+        return chosen
+
+    def vitrine_info(vitrine):
+        return {
+            "slug": vitrine["slug"],
+            "approved": vitrine["approved"],
+            "content": vitrine["content"],
+            "created_at": vitrine["created_at"],
+            "updated_at": vitrine["updated_at"],
+            "exported_at": vitrine["exported_at"],
+            "local_url": f"/s/{vitrine['slug']}",
+            "public_url": f"{base_url}/{vitrine['slug']}/" if base_url else None,
+        }
+
+    def load_vitrine(conn, slug):
+        vitrine = db.vitrine_by_slug(conn, slug)
+        if vitrine is None:
+            raise HTTPException(404, "Vitrine não encontrada.")
+        return vitrine, db.get_lead(conn, vitrine["lead_id"])
+
+    def refuse_blocked(lead):
+        if lead["status"] == "descartado" or lead["do_not_contact_at"]:
+            raise HTTPException(
+                409, "Lead descartado ou marcado como não contatar não recebe vitrine."
+            )
 
     @app.get("/")
     def index():
@@ -263,11 +339,141 @@ def create_app(db_path, searcher=overpass.search):
     def update_lead(lead_id: str, body: UpdateIn):
         with closing(db.connect(db_path)) as conn:
             lead = db.update_lead(conn, lead_id, **body.changes())
+            vitrine = db.vitrine_of_lead(conn, lead_id) if lead else None
         if lead is None:
             raise HTTPException(404, "Lead não encontrado.")
-        return scoring.with_evaluation(lead)
+        return {
+            **scoring.with_evaluation(lead),
+            "vitrine_slug": vitrine["slug"] if vitrine else None,
+            "follow_up_due": outreach.follow_up_due(lead, now()),
+        }
+
+    @app.get("/api/today")
+    def today():
+        with closing(db.connect(db_path)) as conn:
+            return outreach.today(conn, now())
+
+    @app.post("/api/leads/{lead_id}/vitrine")
+    def create_vitrine(lead_id: str):
+        with closing(db.connect(db_path)) as conn:
+            lead = db.get_lead(conn, lead_id)
+            if lead is None:
+                raise HTTPException(404, "Lead não encontrado.")
+            refuse_blocked(lead)
+            vitrine = db.vitrine_of_lead(conn, lead_id)
+            if vitrine is None:
+                slug = vitrines.slug_for(lead, db.vitrine_slugs(conn))
+                vitrine = db.create_vitrine(conn, lead_id, slug)
+        return vitrine_info(vitrine)
+
+    @app.get("/api/vitrines/{slug}")
+    def get_vitrine(slug: str):
+        with closing(db.connect(db_path)) as conn:
+            vitrine, _ = load_vitrine(conn, slug)
+        return vitrine_info(vitrine)
+
+    @app.patch("/api/vitrines/{slug}")
+    def update_vitrine(slug: str, body: VitrineIn):
+        changes = body.model_dump(exclude_unset=True)
+        approved = changes.pop("approved", None)
+        with closing(db.connect(db_path)) as conn:
+            vitrine, _ = load_vitrine(conn, slug)
+            content = dict(vitrine["content"])
+            for key, value in changes.items():
+                cleaned = value.strip() if isinstance(value, str) else value
+                if cleaned:
+                    content[key] = cleaned
+                else:
+                    content.pop(key, None)
+            vitrine = db.update_vitrine(
+                conn, slug, content=content if changes else None, approved=approved
+            )
+        return vitrine_info(vitrine)
+
+    @app.get("/s/{slug}")
+    def vitrine_page(slug: str):
+        with closing(db.connect(db_path)) as conn:
+            vitrine, lead = load_vitrine(conn, slug)
+        content = vitrines.content_for(lead, vitrine["content"])
+        page = vitrines.render(content, preview=not vitrine["approved"])
+        return HTMLResponse(
+            page, headers={"X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store"}
+        )
+
+    @app.post("/api/vitrines/{slug}/export")
+    def export_vitrine(slug: str):
+        with closing(db.connect(db_path)) as conn:
+            vitrine, lead = load_vitrine(conn, slug)
+            refuse_blocked(lead)
+            base = Path(vitrines_dir).resolve()
+            folder = (base / vitrine["slug"]).resolve()
+            if base not in folder.parents:
+                raise HTTPException(400, "Pasta de destino inválida.")
+            folder.mkdir(parents=True, exist_ok=True)
+            content = vitrines.content_for(lead, vitrine["content"])
+            page = vitrines.render(content, preview=not vitrine["approved"])
+            (folder / "index.html").write_bytes(page.encode("utf-8"))
+            vitrine = db.mark_exported(conn, vitrine["slug"])
+        return {**vitrine_info(vitrine), "path": str(folder / "index.html")}
+
+    @app.post("/api/vitrines/{slug}/folder")
+    def client_folder(slug: str):
+        with closing(db.connect(db_path)) as conn:
+            vitrine, lead = load_vitrine(conn, slug)
+            refuse_blocked(lead)
+            base = Path(clientes_dir).resolve()
+            folder = (base / vitrine["slug"]).resolve()
+            if base not in folder.parents:
+                raise HTTPException(400, "Pasta de destino inválida.")
+            content = vitrines.content_for(lead, vitrine["content"])
+            files = vitrines.client_files(lead, vitrine, content)
+        folder.mkdir(parents=True, exist_ok=True)
+        created = []
+        for name, text in files.items():
+            target = folder / name
+            if name == "dados.json" or not target.exists():
+                target.write_bytes(text.encode("utf-8"))
+                created.append(name)
+        return {"path": str(folder), "written": created}
+
+    @app.get("/api/leads/{lead_id}/message")
+    def lead_message(lead_id: str, kind: Literal["abordagem", "follow_up"] = "abordagem"):
+        with closing(db.connect(db_path)) as conn:
+            lead = db.get_lead(conn, lead_id)
+            vitrine = db.vitrine_of_lead(conn, lead_id) if lead else None
+        if lead is None:
+            raise HTTPException(404, "Lead não encontrado.")
+        if lead["do_not_contact_at"]:
+            raise HTTPException(409, "Lead marcado como não contatar.")
+        whatsapp = vitrines.whatsapp_digits(lead)
+        answer = {
+            "whatsapp": whatsapp,
+            "can_whatsapp": bool(whatsapp),
+            "link": None,
+            "link_ready": False,
+            "exported": bool(vitrine and vitrine["exported_at"]),
+            "case": None,
+            "text": None,
+            "warnings": [],
+            "reason": None,
+        }
+        if vitrine is None:
+            return {**answer, "reason": "Crie a vitrine antes de montar a mensagem."}
+        if not base_url:
+            return {**answer, "reason": "Defina LEADFINDER_VITRINE_BASE (a URL onde você publica as prévias) para gerar o link."}
+        link = f"{base_url}/{vitrine['slug']}/"
+        evaluation = scoring.evaluate(lead)
+        case = "follow_up" if kind == "follow_up" else mensagens.case_for(evaluation["offers"])
+        label = overpass.SEGMENTS.get(lead["segment"], (lead["segment"],))[0]
+        built = mensagens.build(case, lead, link, label)
+        return {**answer, **built, "link": link, "link_ready": True}
 
     return app
 
 
-app = create_app(os.environ.get("LEADFINDER_DB", "leads.db"))
+app = create_app(
+    os.environ.get("LEADFINDER_DB", "leads.db"),
+    vitrines_dir=os.environ.get("LEADFINDER_VITRINES_DIR", "vitrines_publicadas"),
+    clientes_dir=os.environ.get("LEADFINDER_CLIENTES_DIR", "clientes"),
+    public_base=os.environ.get("LEADFINDER_VITRINE_BASE"),
+)

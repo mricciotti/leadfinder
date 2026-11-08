@@ -320,6 +320,45 @@ select option {
   font-size: 12px;
 }
 
+.today {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today b {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.vitrine-form {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.vitrine-form input,
+.vitrine-form textarea,
+.drawer textarea.msg {
+  width: 100%;
+}
+
+.drawer textarea.msg {
+  min-height: 9rem;
+}
+
+.vitrine-edit summary {
+  margin: 0.7rem 0;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.warn-text {
+  margin: 0.4rem 0;
+  color: var(--bad);
+  font-size: 13px;
+}
+
 .areas,
 .preview {
   margin-top: 1rem;
@@ -959,6 +998,7 @@ tbody tr:last-child td {
       <div>
         <h1 id="page-title">Leads</h1>
         <p id="page-subtitle">Negócios locais e o que oferecer a cada um.</p>
+        <p class="today" id="today-line"></p>
       </div>
       <div class="actions-row" id="head-actions">
         <button id="export-leads" class="btn primary" type="button">Baixar Leads CSV</button>
@@ -1043,6 +1083,13 @@ tbody tr:last-child td {
             <option value="cardapio_digital">Cardápio digital</option>
             <option value="dominio_proprio">Domínio próprio</option>
             <option value="reformulacao">Reformulação</option>
+          </select>
+        </label>
+        <label>Fila
+          <select data-filter="queue">
+            <option value="">Todos</option>
+            <option value="hoje">Para abordar hoje</option>
+            <option value="follow_up">Fazer follow-up</option>
           </select>
         </label>
       </div>
@@ -1138,6 +1185,7 @@ const EMPTY_FILTER = {
   email: false,
   instagram: false,
   favorite: false,
+  queue: "",
 };
 const MANUAL_FIELDS = [
   ["manual_phone", "Telefone", "(11) 3333-4444"],
@@ -1158,6 +1206,8 @@ const state = {
   stage: "novo",
   filter: { ...EMPTY_FILTER },
   open: null,
+  today: { sent: 0, limit: 15, remaining: 15 },
+  outreach: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1220,6 +1270,7 @@ function filterQuery(withStage) {
 }
 
 async function refresh() {
+  await loadToday();
   if (state.view === "buscar") {
     await loadAreas();
     render();
@@ -1234,6 +1285,17 @@ async function refresh() {
 
 async function loadOptions() {
   state.options = await api("/api/filter-options");
+}
+
+async function loadToday() {
+  state.today = await api("/api/today");
+  const { sent, limit, remaining } = state.today;
+  $("today-line").replaceChildren(
+    "Abordados hoje: ",
+    h("b", {}, String(sent)),
+    ` de ${limit}`,
+    remaining === 0 ? " · limite do dia atingido" : ""
+  );
 }
 
 async function loadNeighborhoods() {
@@ -1343,6 +1405,7 @@ async function updateLead(id, patch, reload = true) {
     if ($("message").className === "error") showMessage("");
     if (reload) {
       await refresh();
+      if (state.open && state.open.id === id) await loadOutreach(id);
       renderDrawer();
     }
   } catch (error) {
@@ -1370,7 +1433,9 @@ function favoriteButton(lead) {
 
 function openLead(id) {
   state.open = findLead(id);
+  state.outreach = null;
   renderDrawer();
+  loadOutreach(id);
 }
 
 function closeDrawer() {
@@ -1490,7 +1555,17 @@ function leadTableRow(lead) {
     h("td", {}, siteBadge(lead)),
     h("td", {}, offerPills(lead)),
     h("td", {}, priorityBadge(lead)),
-    h("td", {}, stageBadge(lead))
+    h(
+      "td",
+      {},
+      h(
+        "div",
+        { class: "pills" },
+        stageBadge(lead),
+        lead.do_not_contact_at ? badge("Não contatar", "tone-bad", true) : null,
+        lead.vitrine_slug ? badge("Vitrine", "tone-info", true) : null
+      )
+    )
   );
 }
 
@@ -1631,6 +1706,274 @@ function manualForm(lead) {
   );
 }
 
+function parseLines(text, key) {
+  return text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, ...rest] = line.split("|");
+      return { name: name.trim(), [key]: rest.join("|").trim() };
+    });
+}
+
+function linesOf(items, key) {
+  return (items || [])
+    .map((item) => (item[key] ? `${item.name} | ${item[key]}` : item.name))
+    .join("\n");
+}
+
+async function loadOutreach(id) {
+  const lead = findLead(id);
+  if (!lead) return;
+  const outreach = { leadId: id, vitrine: null, message: null, error: null };
+  try {
+    if (lead.vitrine_slug) {
+      outreach.vitrine = await api(`/api/vitrines/${enc(lead.vitrine_slug)}`);
+    }
+    const eligible =
+      !lead.do_not_contact_at && (NOT_APPROACHED.includes(lead.status) || lead.follow_up_due);
+    if (eligible && lead.vitrine_slug) {
+      const kind = lead.follow_up_due ? "follow_up" : "abordagem";
+      outreach.message = await api(`/api/leads/${enc(id)}/message?kind=${kind}`);
+    }
+  } catch (error) {
+    outreach.error = error.message;
+  }
+  state.outreach = outreach;
+  if (state.open && state.open.id === id) renderDrawer();
+}
+
+async function postAndReload(path, success) {
+  try {
+    const result = await api(path, { method: "POST" });
+    showMessage(success(result));
+    await refresh();
+    if (state.open) await loadOutreach(state.open.id);
+    renderDrawer();
+  } catch (error) {
+    showMessage(error.message, true);
+  }
+}
+
+function createVitrine(id) {
+  return postAndReload(`/api/leads/${enc(id)}/vitrine`, () => "Vitrine criada.");
+}
+
+function exportVitrine(slug) {
+  return postAndReload(
+    `/api/vitrines/${enc(slug)}/export`,
+    (result) => `Pasta gravada em ${result.path}. Publique essa pasta no seu projeto de hospedagem antes de enviar o link.`
+  );
+}
+
+function makeClientFolder(slug) {
+  return postAndReload(
+    `/api/vitrines/${enc(slug)}/folder`,
+    (result) => `Pasta do cliente em ${result.path}. Abra no Claude Code e leia o PROMPT.md.`
+  );
+}
+
+async function saveVitrine(slug, data) {
+  const body = {
+    category: data.get("category") || "",
+    address: data.get("address") || "",
+    hours: data.get("hours") || "",
+    services: parseLines(data.get("services") || "", "text"),
+    menu: parseLines(data.get("menu") || "", "price"),
+    approved: data.get("approved") === "on",
+  };
+  try {
+    await api(`/api/vitrines/${enc(slug)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    showMessage("Vitrine salva.");
+    if (state.open) await loadOutreach(state.open.id);
+  } catch (error) {
+    showMessage(error.message, true);
+  }
+}
+
+function formField(name, label, value, maxlength) {
+  return h(
+    "label",
+    {},
+    label,
+    h("input", { name, value: value || "", maxlength, autocomplete: "off" })
+  );
+}
+
+function formArea(name, label, value) {
+  return h("label", {}, label, h("textarea", { name, rows: "4" }, value));
+}
+
+function vitrineBlock(lead, vitrine) {
+  const content = vitrine.content || {};
+  const exported = vitrine.exported_at
+    ? `Exportada em ${formatDate(vitrine.exported_at)}`
+    : "Ainda não exportada";
+  const form = h(
+    "form",
+    {
+      class: "vitrine-form",
+      onsubmit: (event) => {
+        event.preventDefault();
+        saveVitrine(vitrine.slug, new FormData(event.target));
+      },
+    },
+    formField("category", "Categoria (ex.: Barbearia)", content.category, 40),
+    formField("address", "Endereço completo, com número", content.address, 160),
+    formField("hours", "Horário (só o que você confirmou)", content.hours, 120),
+    formArea("services", "Serviços reais, um por linha: Nome | descrição", linesOf(content.services, "text")),
+    formArea("menu", "Cardápio (só comida), um por linha: Nome | preço", linesOf(content.menu, "price")),
+    h(
+      "label",
+      { class: "chip" },
+      h("input", { type: "checkbox", name: "approved", checked: vitrine.approved }),
+      " Aprovada pelo dono (tira a faixa de prévia)"
+    ),
+    h("button", { type: "submit", class: "btn primary" }, "Salvar vitrine")
+  );
+  return [
+    h(
+      "div",
+      { class: "pills" },
+      badge(vitrine.approved ? "Aprovada" : "Prévia", vitrine.approved ? "tone-good" : "tone-warn"),
+      badge(exported, "", true)
+    ),
+    h(
+      "div",
+      { class: "links", style: "margin-top: 0.6rem" },
+      externalLink(vitrine.local_url, "Abrir prévia"),
+      h("button", { type: "button", class: "btn small", "data-role": "export", onclick: () => exportVitrine(vitrine.slug) }, "Exportar pasta"),
+      h("button", { type: "button", class: "btn small", "data-role": "folder", onclick: () => makeClientFolder(vitrine.slug) }, "Preparar pasta do cliente")
+    ),
+    vitrine.public_url
+      ? h("p", { class: "muted", "data-role": "public-url" }, `Link público: ${vitrine.public_url}`)
+      : h("p", { class: "muted", "data-role": "no-base" }, "Sem LEADFINDER_VITRINE_BASE: só a prévia local."),
+    h("details", { class: "vitrine-edit" }, h("summary", {}, "Editar conteúdo da vitrine"), form),
+  ];
+}
+
+function whatsappTextUrl(message, text) {
+  return `https://wa.me/${message.whatsapp}?text=${enc(text)}`;
+}
+
+function messageBlock(lead, message) {
+  const isFollowUp = message.case === "follow_up";
+  const title = isFollowUp ? "Mensagem de follow-up" : "Mensagem de abordagem";
+  if (!message.text) {
+    return [
+      h("h3", {}, title),
+      h("p", { class: "muted", "data-role": "no-message" }, message.reason || "Sem mensagem."),
+    ];
+  }
+  const canOpen = message.can_whatsapp && /^\d{12,13}$/.test(message.whatsapp);
+  const area = h(
+    "textarea",
+    {
+      class: "msg",
+      id: "message-text",
+      "aria-label": title,
+      oninput: (event) => {
+        const link = $("wa-link");
+        if (link) link.href = whatsappTextUrl(message, event.target.value);
+      },
+    },
+    message.text
+  );
+  const copy = h(
+    "button",
+    {
+      type: "button",
+      class: "btn small",
+      "data-role": "copy",
+      onclick: async (event) => {
+        try {
+          await navigator.clipboard.writeText(area.value);
+          event.target.textContent = "Copiada!";
+        } catch (error) {
+          event.target.textContent = "Selecione e copie";
+        }
+      },
+    },
+    "Copiar mensagem"
+  );
+  return [
+    h("h3", {}, title),
+    isFollowUp ? h("p", { class: "muted" }, "Já passaram 3 dias ou mais desde o contato.") : null,
+    area,
+    ...message.warnings.map((warning) => h("p", { class: "warn-text", "data-role": "warning" }, warning)),
+    message.exported
+      ? null
+      : h("p", { class: "muted", "data-role": "not-exported" }, "Exporte e publique a pasta antes de enviar: sem isso o link ainda não abre."),
+    h(
+      "div",
+      { class: "links", style: "margin-top: 0.6rem" },
+      canOpen
+        ? h(
+            "a",
+            { class: "btn small primary", id: "wa-link", target: "_blank", rel: "noopener noreferrer", href: whatsappTextUrl(message, message.text) },
+            "Abrir WhatsApp com a mensagem"
+          )
+        : h("span", { class: "muted", "data-role": "no-whatsapp" }, "Sem número de WhatsApp: use Copiar."),
+      copy,
+      h(
+        "button",
+        {
+          type: "button",
+          class: "btn small",
+          "data-role": "sent",
+          onclick: () =>
+            isFollowUp
+              ? updateLead(lead.id, { follow_up_sent: true })
+              : updateLead(lead.id, { status: "contatado" }),
+        },
+        isFollowUp ? "Enviei o follow-up" : "Enviei"
+      )
+    ),
+  ];
+}
+
+function outreachBlock(lead) {
+  const blocked = lead.status === "descartado" || lead.do_not_contact_at;
+  const toggle = h(
+    "button",
+    {
+      type: "button",
+      class: "btn small",
+      "data-role": "do-not-contact",
+      onclick: () => updateLead(lead.id, { do_not_contact: !lead.do_not_contact_at }),
+    },
+    lead.do_not_contact_at
+      ? `Desfazer "não contatar" (desde ${formatDate(lead.do_not_contact_at)})`
+      : "Não contatar"
+  );
+  const nodes = [h("h3", {}, "Abordagem")];
+  if (blocked) {
+    nodes.push(
+      h("p", { class: "muted", "data-role": "blocked" }, "Lead descartado ou marcado como não contatar: sem vitrine e sem mensagem."),
+      toggle
+    );
+    return nodes;
+  }
+  const outreach = state.outreach && state.outreach.leadId === lead.id ? state.outreach : null;
+  if (!outreach) return [...nodes, h("p", { class: "muted" }, "Carregando…"), toggle];
+  if (outreach.error) nodes.push(h("p", { class: "warn-text" }, outreach.error));
+  if (!lead.vitrine_slug) {
+    nodes.push(
+      h("button", { type: "button", class: "btn primary", "data-role": "create-vitrine", onclick: () => createVitrine(lead.id) }, "Criar vitrine")
+    );
+  } else if (outreach.vitrine) {
+    nodes.push(...vitrineBlock(lead, outreach.vitrine));
+  }
+  if (outreach.message) nodes.push(...messageBlock(lead, outreach.message));
+  nodes.push(h("p", {}, toggle));
+  return nodes;
+}
+
 function renderDrawer() {
   const lead = state.open ? findLead(state.open.id) || state.open : null;
   $("drawer").hidden = !lead;
@@ -1716,6 +2059,7 @@ function renderDrawer() {
         absence
       )
     ),
+    ...outreachBlock(lead),
     h("h3", {}, "Por que esta prioridade"),
     h("p", {}, priority.reason),
     h("p", { class: "muted" }, `Contato: ${LEVEL_LABELS[contact.level]} (${plural(contact.points, "ponto", "pontos")})`),
@@ -2022,6 +2366,7 @@ document.querySelectorAll("[data-filter]").forEach((control) => {
   control.addEventListener("change", () => {
     state.filter[control.dataset.filter] =
       control.type === "checkbox" ? control.checked : control.value;
+    if (control.dataset.filter === "queue" && control.value) state.stage = "";
     refresh().catch((error) => showMessage(error.message, true));
   });
 });
