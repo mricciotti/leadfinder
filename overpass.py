@@ -3,11 +3,13 @@ import asyncio
 import httpx
 
 import contacts
+import zones
 
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "leadfinder-personal/0.1"
 MIN_HALF_SPAN = 0.008
+ZONE_TIMEOUT = 180
 RETRY_STATUSES = (429, 502, 503, 504)
 RETRY_WAITS = (5, 15, 30)
 
@@ -54,6 +56,7 @@ INSTAGRAM_TAGS = ("contact:instagram", "instagram")
 FACEBOOK_TAGS = ("contact:facebook", "facebook")
 OTHER_LINK_TAGS = ("contact:tiktok", "contact:youtube", "contact:linkedin", "contact:twitter")
 EMAIL_TAGS = ("email", "contact:email")
+NEIGHBORHOOD_TAGS = ("addr:suburb", "addr:neighbourhood")
 
 
 class PlaceNotFound(Exception):
@@ -93,6 +96,24 @@ def build_query(segment, bbox):
         for key, value in SEGMENTS[segment][1]
     )
     return f"[out:json][timeout:90];({filters});out center tags;"
+
+
+def build_zone_query(segment, districts):
+    names = "|".join(districts)
+    filters = "".join(
+        f'nwr["{key}"="{value}"]["name"](area.zone);'
+        for key, value in SEGMENTS[segment][1]
+    )
+    return (
+        f"[out:json][timeout:{ZONE_TIMEOUT}];"
+        f'area["name"="{zones.CITY}"]["boundary"="administrative"]["admin_level"="8"]->.city;'
+        f'rel(area.city)["boundary"="administrative"]["admin_level"="9"]["name"~"^({names})$"]->.districts;'
+        "foreach.districts->.district("
+        ".district out tags;"
+        ".district map_to_area->.zone;"
+        f"({filters});out center tags;"
+        ");"
+    )
 
 
 def first_value(tags, keys):
@@ -144,12 +165,27 @@ def score(phone, hours, address, instagram):
     )
 
 
-def parse_places(data, segment, neighborhood, city=None, uf=None):
-    named = [
-        element
-        for element in data.get("elements", [])
-        if element.get("tags", {}).get("name")
-    ]
+def group_by_district(data):
+    current, districts, seen, elements = None, {}, set(), []
+    for element in data.get("elements", []):
+        tags = element.get("tags", {})
+        if tags.get("boundary") == "administrative":
+            current = tags.get("name")
+            continue
+        key = (element["type"], element["id"])
+        if key not in seen:
+            seen.add(key)
+            districts[key] = current
+            elements.append(element)
+    return elements, districts
+
+
+def parse_places(data, segment, neighborhood, city=None, uf=None, zone=None):
+    if zone:
+        elements, districts = group_by_district(data)
+    else:
+        elements, districts = data.get("elements", []), {}
+    named = [element for element in elements if element.get("tags", {}).get("name")]
     leads = []
     for element in named:
         tags = element["tags"]
@@ -163,7 +199,14 @@ def parse_places(data, segment, neighborhood, city=None, uf=None):
                 "id": f"{element['type']}-{element['id']}",
                 "name": tags["name"],
                 "segment": segment,
-                "neighborhood": neighborhood,
+                "neighborhood": (
+                    first_value(tags, NEIGHBORHOOD_TAGS)
+                    or districts.get((element["type"], element["id"]))
+                    or neighborhood
+                    if zone
+                    else neighborhood
+                ),
+                "zone": zone,
                 "phone": phone,
                 "phone_national": phone_national,
                 "phone_kind": phone_kind,
@@ -216,15 +259,27 @@ async def query_overpass(client, query, sleep):
 
 
 async def search(
-    segment, neighborhood, city, transport=None, sleep=asyncio.sleep, place=None
+    segment,
+    neighborhood,
+    city,
+    transport=None,
+    sleep=asyncio.sleep,
+    place=None,
+    zone=None,
 ):
+    timeout = ZONE_TIMEOUT + 20 if zone else 90
     async with httpx.AsyncClient(
-        timeout=90, headers={"User-Agent": USER_AGENT}, transport=transport
+        timeout=timeout, headers={"User-Agent": USER_AGENT}, transport=transport
     ) as client:
-        if place:
+        if zone:
+            uf = zones.UF
+            query = build_zone_query(segment, zones.districts(zone))
+        elif place:
             bbox = normalize_bbox(place["lat"], place["lon"], place["lat"], place["lon"])
             uf = place["uf"]
+            query = build_query(segment, bbox)
         else:
             bbox, uf = await geocode(client, neighborhood, city)
-        data = await query_overpass(client, build_query(segment, bbox), sleep)
-    return parse_places(data, segment, neighborhood, city, uf)
+            query = build_query(segment, bbox)
+        data = await query_overpass(client, query, sleep)
+    return parse_places(data, segment, neighborhood, city, uf, zone)

@@ -277,7 +277,8 @@ h1 {
 
 .search form {
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1.4fr) minmax(10rem, 1.2fr) auto;
+  grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 1fr) auto;
+  max-width: 44rem;
   align-items: end;
   gap: 0.75rem;
 }
@@ -464,6 +465,126 @@ select option {
 .stat span {
   color: var(--muted);
   font-size: 13px;
+}
+
+.today-summary {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.today-card {
+  overflow: hidden;
+}
+
+.today-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem 0.75rem;
+}
+
+.today-card-head p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.today-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-summary .card {
+  padding: 0.9rem 1.1rem;
+}
+
+.today-summary .muted {
+  font-size: 13px;
+}
+
+.quick-search {
+  max-width: 32rem;
+  margin: 0.9rem 0;
+}
+
+.next-action {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.next-action:hover {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.next-action.muted-action {
+  border-color: var(--rule);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.workflow {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.workflow-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.workflow-step {
+  min-width: 0;
+  padding: 0.45rem 0.35rem;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.workflow-step.done {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.workflow-step.current {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.workflow-step strong {
+  display: block;
+  font-size: 12px;
 }
 
 .toolbar {
@@ -960,6 +1081,14 @@ tbody tr:last-child td {
   .manual-form {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .today-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workflow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>
 </head>
@@ -973,6 +1102,10 @@ tbody tr:last-child td {
       <span>Leadfinder</span>
     </div>
     <nav class="nav" aria-label="Seções">
+      <button type="button" data-view="hoje">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m8 15 2 2 5-5"/></svg>
+        <span>Hoje</span>
+      </button>
       <button type="button" data-view="buscar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <span>Buscar</span>
@@ -1011,21 +1144,16 @@ tbody tr:last-child td {
     <section class="view" id="view-buscar" hidden>
     <div class="card search" aria-label="Buscar no mapa">
       <h2 class="card-title">Buscar novos leads no mapa</h2>
-      <p class="card-hint">Vai ao OpenStreetMap e mostra os negócios que encontrar. Nada é salvo até você escolher. Se o servidor estiver ocupado, tento de novo sozinho, e isso pode levar alguns minutos.</p>
+      <p class="card-hint">Busca na zona inteira de São Paulo, no OpenStreetMap, e mostra os negócios que encontrar. Zona grande demora: pode levar de um a alguns minutos. Nada é salvo até você escolher.</p>
       <form id="search-form">
         <label>Segmento
           <select id="segment"></select>
         </label>
-        <label>Bairro
-          <input id="neighborhood" list="neighborhood-options" required minlength="2" placeholder="Escolha ou digite" autocomplete="off">
-          <datalist id="neighborhood-options"></datalist>
-        </label>
-        <label>Cidade
-          <input id="city" value="São Paulo" autocomplete="off">
+        <label>Zona
+          <select id="zone"></select>
         </label>
         <button id="search-button" class="btn primary" type="submit">Buscar leads</button>
       </form>
-      <p class="field-hint" id="neighborhood-hint"></p>
       <div id="progress" class="progress" hidden><span></span></div>
     </div>
     <div class="card preview" id="preview" hidden></div>
@@ -1042,9 +1170,16 @@ tbody tr:last-child td {
         </div>
         <button id="clear-filters" class="btn small" type="button" hidden>Limpar filtros</button>
       </div>
+      <label class="quick-search">
+        <span>Buscar na lista</span>
+        <input id="lead-search" type="search" placeholder="Nome, telefone, Instagram ou endereço" autocomplete="off">
+      </label>
       <div class="filters">
         <label>Segmento
           <select id="filter-segment" data-filter="segment"></select>
+        </label>
+        <label>Zona
+          <select id="filter-zone" data-filter="zone"></select>
         </label>
         <label>Bairro
           <select id="filter-neighborhood" data-filter="neighborhood"></select>
@@ -1102,7 +1237,8 @@ tbody tr:last-child td {
       <div class="stages" id="stages" aria-label="Etapas do funil"></div>
     </section>
 
-    <section class="view" id="view-leads"></section>
+  <section class="view" id="view-leads"></section>
+  <section class="view" id="view-hoje" hidden></section>
     <section class="view" id="view-planilha" hidden></section>
     <section class="view" id="view-funil" hidden></section>
   </main>
@@ -1168,6 +1304,7 @@ const SITE_TONES = {
 const NOT_APPROACHED = ["novo", "prospecto"];
 const NO_OWN_SITE = ["sem_site_na_fonte", "so_rede_social", "ausencia_confirmada"];
 const VIEWS = {
+  hoje: ["Hoje", "As próximas ações para manter a prospecção andando."],
   buscar: ["Buscar", "Procure negócios novos no mapa e veja o que você já buscou."],
   leads: ["Leads", "Negócios locais e o que oferecer a cada um."],
   planilha: ["Planilha", "As mesmas colunas do Leads CSV, direto na tela."],
@@ -1175,6 +1312,7 @@ const VIEWS = {
 };
 const EMPTY_FILTER = {
   segment: "",
+  zone: "",
   neighborhood: "",
   city: "",
   uf: "",
@@ -1195,16 +1333,20 @@ const MANUAL_FIELDS = [
 ];
 
 const state = {
-  view: "leads",
+  view: "hoje",
   areas: [],
   preview: null,
   saving: false,
   leads: [],
+  todayLeads: [],
+  followUps: [],
   sheet: { columns: [], ids: [], rows: [] },
   segments: {},
+  zones: {},
   options: { segments: [], neighborhoods: [], cities: [], ufs: [] },
   stage: "novo",
   filter: { ...EMPTY_FILTER },
+  search: "",
   open: null,
   today: { sent: 0, limit: 15, remaining: 15 },
   outreach: null,
@@ -1276,6 +1418,16 @@ async function refresh() {
     render();
     return;
   }
+  if (state.view === "hoje") {
+    const [todayLeads, followUps] = await Promise.all([
+      api("/api/leads?queue=hoje"),
+      api("/api/leads?queue=follow_up"),
+    ]);
+    state.todayLeads = todayLeads;
+    state.followUps = followUps;
+    render();
+    return;
+  }
   state.leads = await api(`/api/leads?${filterQuery(false)}`);
   if (state.view === "planilha") {
     state.sheet = await api(`/api/leads-table?${filterQuery(true)}`);
@@ -1296,20 +1448,6 @@ async function loadToday() {
     ` de ${limit}`,
     remaining === 0 ? " · limite do dia atingido" : ""
   );
-}
-
-async function loadNeighborhoods() {
-  const city = $("city").value.trim();
-  let names = [];
-  try {
-    names = await api(`/api/neighborhoods?city=${enc(city)}`);
-  } catch (error) {
-    names = [];
-  }
-  $("neighborhood-options").replaceChildren(...names.map((name) => h("option", { value: name })));
-  $("neighborhood-hint").textContent = names.length
-    ? `${plural(names.length, "bairro", "bairros")} de ${city} para escolher. Digite para filtrar.`
-    : "Sem lista para essa cidade: digite o bairro.";
 }
 
 async function loadAreas() {
@@ -1390,7 +1528,16 @@ function whatsappLink(lead) {
 }
 
 function findLead(id) {
-  return state.leads.find((lead) => lead.id === id) || null;
+  return [state.leads, state.todayLeads, state.followUps]
+    .flat()
+    .find((lead) => lead.id === id) || null;
+}
+
+function replaceLead(updated) {
+  const replace = (leads) => leads.map((lead) => (lead.id === updated.id ? updated : lead));
+  state.leads = replace(state.leads);
+  state.todayLeads = replace(state.todayLeads);
+  state.followUps = replace(state.followUps);
 }
 
 async function updateLead(id, patch, reload = true) {
@@ -1400,7 +1547,7 @@ async function updateLead(id, patch, reload = true) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
-    state.leads = state.leads.map((lead) => (lead.id === id ? updated : lead));
+    replaceLead(updated);
     if (state.open && state.open.id === id) state.open = updated;
     if ($("message").className === "error") showMessage("");
     if (reload) {
@@ -1459,6 +1606,58 @@ function renderStats() {
   );
 }
 
+function nextAction(lead) {
+  if (lead.status === "descartado" || lead.do_not_contact_at) {
+    return { label: "Não contatar", muted: true };
+  }
+  if (lead.follow_up_due) {
+    return { label: "Fazer follow-up" };
+  }
+  if (NOT_APPROACHED.includes(lead.status)) {
+    return lead.vitrine_slug
+      ? { label: "Abordar" }
+      : { label: "Criar vitrine" };
+  }
+  if (lead.status === "contatado") {
+    return { label: "Aguardar resposta", muted: true };
+  }
+  if (lead.status === "respondeu") {
+    return { label: "Continuar conversa" };
+  }
+  return { label: "Cliente fechado", muted: true };
+}
+
+function nextActionButton(lead) {
+  const action = nextAction(lead);
+  return h(
+    "button",
+    {
+      type: "button",
+      class: `next-action${action.muted ? " muted-action" : ""}`,
+      onclick: (event) => {
+        event.stopPropagation();
+        openLead(lead.id);
+      },
+    },
+    action.label
+  );
+}
+
+function matchesSearch(lead) {
+  const query = textKey(state.search);
+  if (!query) return true;
+  const haystack = textKey([
+    lead.name,
+    lead.phone,
+    lead.email,
+    lead.instagram,
+    lead.address,
+    lead.neighborhood,
+    lead.city,
+  ].filter(Boolean).join(" "));
+  return query.split(" ").every((part) => haystack.includes(part));
+}
+
 function filterSelect(id, key, values, allLabel, labelOf) {
   const active = state.filter[key];
   const shown = active && !values.includes(active) ? [active, ...values] : values;
@@ -1472,6 +1671,7 @@ function renderFilters() {
   const same = (value) => value;
   const { segments, neighborhoods, cities, ufs } = state.options;
   filterSelect("filter-segment", "segment", segments, "Todos", (key) => state.segments[key] || key);
+  filterSelect("filter-zone", "zone", Object.keys(state.zones), "Todas", (key) => state.zones[key]);
   filterSelect("filter-neighborhood", "neighborhood", neighborhoods, "Todos", same);
   filterSelect("filter-city", "city", cities, "Todas", same);
   filterSelect("filter-uf", "uf", ufs, "Todas", same);
@@ -1480,7 +1680,8 @@ function renderFilters() {
     if (control.type === "checkbox") control.checked = value;
     else control.value = value;
   });
-  const active = Object.values(state.filter).filter(Boolean).length;
+  $("lead-search").value = state.search;
+  const active = Object.values(state.filter).filter(Boolean).length + (state.search ? 1 : 0);
   $("clear-filters").hidden = active === 0;
   $("clear-filters").textContent = `Limpar filtros (${active})`;
 }
@@ -1517,6 +1718,7 @@ function emptyText() {
   if (state.options.segments.length === 0) {
     return "Nenhum lead ainda. Vá em Buscar, escolha um segmento e um bairro e procure no mapa.";
   }
+  if (state.search) return "Nenhum lead encontrado com essa busca.";
   if (state.leads.length === 0) return "Nenhum lead com esses filtros.";
   return "Nenhum lead nesta etapa.";
 }
@@ -1565,17 +1767,18 @@ function leadTableRow(lead) {
         lead.do_not_contact_at ? badge("Não contatar", "tone-bad", true) : null,
         lead.vitrine_slug ? badge("Vitrine", "tone-info", true) : null
       )
-    )
+    ),
+    h("td", {}, nextActionButton(lead))
   );
 }
 
 function renderLeads() {
-  const visible = stageLeads();
+  const visible = stageLeads().filter(matchesSearch);
   if (visible.length === 0) {
     $("view-leads").replaceChildren(h("div", { class: "card empty" }, emptyText()));
     return;
   }
-  const headers = ["", "Negócio", "Contato", "Site", "Oferecer", "Prioridade", "Etapa"];
+  const headers = ["", "Negócio", "Contato", "Site", "Oferecer", "Prioridade", "Etapa", "Próxima ação"];
   $("view-leads").replaceChildren(
     h(
       "div",
@@ -1604,7 +1807,13 @@ function sheetCell(value) {
 
 function renderSheet() {
   const { columns, ids, rows } = state.sheet;
-  if (rows.length === 0) {
+  const visible = rows
+    .map((row, index) => ({ row, id: ids[index] }))
+    .filter(({ id }) => {
+      const lead = findLead(id);
+      return lead ? matchesSearch(lead) : true;
+    });
+  if (visible.length === 0) {
     $("view-planilha").replaceChildren(h("div", { class: "card empty" }, emptyText()));
     return;
   }
@@ -1615,7 +1824,7 @@ function renderSheet() {
       h(
         "div",
         { class: "sheet-head" },
-        h("strong", {}, plural(rows.length, "linha", "linhas")),
+         h("strong", {}, plural(visible.length, "linha", "linhas")),
         h("span", { class: "muted" }, "É exatamente o que vai no Leads CSV. Clique numa linha para abrir o lead.")
       ),
       h(
@@ -1628,8 +1837,8 @@ function renderSheet() {
           h(
             "tbody",
             {},
-            ...rows.map((row, index) =>
-              h("tr", { "data-id": ids[index], onclick: () => openLead(ids[index]) }, ...row.map(sheetCell))
+             ...visible.map(({ row, id }) =>
+              h("tr", { "data-id": id, onclick: () => openLead(id) }, ...row.map(sheetCell))
             )
           )
         )
@@ -1679,6 +1888,75 @@ function renderBoard() {
           ...(leads.length ? leads.map(dealCard) : [h("p", { class: "muted" }, "Nenhum lead.")])
         );
       })
+    )
+  );
+}
+
+function leadsTable(leads) {
+  const headers = ["", "Negócio", "Contato", "Site", "Oferecer", "Prioridade", "Etapa", "Próxima ação"];
+  return h(
+    "div",
+    { class: "table-wrap" },
+    h(
+      "table",
+      { class: "leads" },
+      h("thead", {}, h("tr", {}, ...headers.map((title) => h("th", {}, title)))),
+      h("tbody", {}, ...leads.map(leadTableRow))
+    )
+  );
+}
+
+function todaySection(title, description, leads, empty) {
+  return h(
+    "section",
+    { class: "card today-card" },
+    h(
+      "div",
+      { class: "today-card-head" },
+      h("div", {}, h("h2", { class: "card-title" }, title), h("p", {}, description)),
+      h("span", { class: "muted" }, plural(leads.length, "lead", "leads"))
+    ),
+    leads.length ? leadsTable(leads) : h("div", { class: "empty" }, empty)
+  );
+}
+
+function renderToday() {
+  const { sent, limit, remaining } = state.today;
+  const summary = h(
+    "div",
+    { class: "today-summary" },
+    h(
+      "div",
+      { class: "card" },
+      h("span", { class: "today-number" }, `${remaining}`),
+      h("span", { class: "muted" }, remaining ? "abordagens disponíveis hoje" : "limite diário atingido")
+    ),
+    h(
+      "div",
+      { class: "card" },
+      h("span", { class: "today-number" }, `${sent}`),
+      h("span", { class: "muted" }, `abordados de ${limit}`)
+    ),
+    h(
+      "div",
+      { class: "card" },
+      h("span", { class: "today-number" }, `${state.followUps.length}`),
+      h("span", { class: "muted" }, "follow-ups pendentes")
+    )
+  );
+  $("view-hoje").replaceChildren(
+    summary,
+    todaySection(
+      "Para abordar hoje",
+      "Leads com canal, vitrine e dentro do limite diário.",
+      state.todayLeads,
+      "Nenhum lead pronto para abordar agora. Crie vitrines para os próximos prospectos."
+    ),
+    todaySection(
+      "Fazer follow-up",
+      "Leads contatados há três dias ou mais sem follow-up registrado.",
+      state.followUps,
+      "Nenhum follow-up pendente."
     )
   );
 }
@@ -1974,6 +2252,43 @@ function outreachBlock(lead) {
   return nodes;
 }
 
+function workflowBlock(lead) {
+  const blocked = lead.status === "descartado" || lead.do_not_contact_at;
+  const steps = [
+    ["Conferir", Boolean(lead.manual_checked_at || lead.absence_confirmed_at)],
+    ["Vitrine", Boolean(lead.vitrine_slug)],
+    ["Abordar", !NOT_APPROACHED.includes(lead.status)],
+    ["Acompanhar", Boolean(lead.follow_up_at) || ["respondeu", "fechado"].includes(lead.status)],
+  ];
+  const current = blocked ? -1 : steps.findIndex(([, done]) => !done);
+  const action = nextAction(lead);
+  const helper = lead.do_not_contact_at
+    ? "Este lead está fora da prospecção."
+    : current === 0
+      ? "Confira site e contatos e salve o que encontrar."
+      : current === 1
+        ? "Crie uma prévia antes de abordar."
+        : current === 2
+          ? "Revise a mensagem e marque Enviei somente depois de enviar."
+          : lead.follow_up_due
+            ? "O follow-up está pendente."
+            : "Aguarde uma resposta ou registre o próximo passo.";
+  return h(
+    "div",
+    { class: "workflow" },
+    h("p", { class: "workflow-title" }, `Próxima ação: ${action.label}`),
+    h("div", { class: "workflow-steps" }, ...steps.map(([label, done], index) =>
+      h(
+        "div",
+        { class: `workflow-step${done ? " done" : index === current ? " current" : ""}` },
+        h("strong", {}, `${index + 1}. ${label}`),
+        done ? "Concluído" : index === current ? "Agora" : "Depois"
+      )
+    )),
+    h("p", { class: "muted" }, helper)
+  );
+}
+
 function renderDrawer() {
   const lead = state.open ? findLead(state.open.id) || state.open : null;
   $("drawer").hidden = !lead;
@@ -2014,6 +2329,7 @@ function renderDrawer() {
         lead.favorite ? "★ Favorito" : "☆ Favoritar"
       )
     ),
+    workflowBlock(lead),
     h("h3", {}, "O que oferecer"),
     offers.length
       ? h(
@@ -2098,14 +2414,16 @@ function areaRow(area) {
       {},
       h("div", { class: "pills" },
         h("button", { type: "button", class: "btn small", "data-action": "see", onclick: () => seeArea(area) }, "Ver leads"),
-        h("button", { type: "button", class: "btn small", "data-action": "again", onclick: () => searchAgain(area) }, "Buscar de novo")
+        area.zone
+          ? h("button", { type: "button", class: "btn small", "data-action": "again", onclick: () => searchAgain(area) }, "Buscar de novo")
+          : null
       )
     )
   );
 }
 
 function renderAreas() {
-  const headers = ["Segmento", "Bairro", "Cidade", "Leads", "Prioridade alta", "Já abordados", "Atualizado", ""];
+  const headers = ["Segmento", "Zona ou bairro", "Cidade", "Leads", "Prioridade alta", "Já abordados", "Atualizado", ""];
   const head = h(
     "div",
     { class: "areas-head" },
@@ -2267,7 +2585,7 @@ async function savePreview() {
     state.filter = {
       ...EMPTY_FILTER,
       segment: matchOption(state.options.segments, preview.segment),
-      neighborhood: matchOption(state.options.neighborhoods, preview.neighborhood),
+      zone: preview.zone,
     };
     state.view = "leads";
     history.replaceState(null, "", "#leads");
@@ -2284,31 +2602,33 @@ async function savePreview() {
 
 function seeArea(area) {
   state.stage = "";
-  state.filter = {
-    ...EMPTY_FILTER,
-    segment: area.segment,
-    neighborhood: matchOption(state.options.neighborhoods, area.neighborhood) || area.neighborhood,
-    city: area.city ? matchOption(state.options.cities, area.city) || area.city : "",
-  };
+  state.filter = area.zone
+    ? { ...EMPTY_FILTER, segment: area.segment, zone: area.zone }
+    : {
+        ...EMPTY_FILTER,
+        segment: area.segment,
+        neighborhood: matchOption(state.options.neighborhoods, area.neighborhood) || area.neighborhood,
+        city: area.city ? matchOption(state.options.cities, area.city) || area.city : "",
+      };
   showView("leads");
 }
 
 function searchAgain(area) {
   $("segment").value = area.segment;
-  $("neighborhood").value = area.neighborhood;
-  $("city").value = area.city || "São Paulo";
-  $("neighborhood").focus();
+  $("zone").value = area.zone;
+  $("zone").focus();
   showMessage("Campos preenchidos. Clique em Buscar leads para repetir a busca.");
 }
 
 function renderView() {
   const [title, subtitle] = VIEWS[state.view];
   const searching = state.view === "buscar";
+  const focused = searching || state.view === "hoje";
   $("page-title").textContent = title;
   $("page-subtitle").textContent = subtitle;
-  $("head-actions").hidden = searching;
-  $("stats").hidden = searching;
-  $("toolbar").hidden = searching;
+  $("head-actions").hidden = focused;
+  $("stats").hidden = focused;
+  $("toolbar").hidden = focused;
   if (searching) {
     renderPreview();
     renderAreas();
@@ -2320,6 +2640,7 @@ function renderView() {
     $(`view-${view}`).hidden = view !== state.view;
   });
   if (state.view === "leads") renderLeads();
+  if (state.view === "hoje") renderToday();
   if (state.view === "planilha") renderSheet();
   if (state.view === "funil") renderBoard();
 }
@@ -2377,11 +2698,15 @@ document.querySelectorAll("[data-view]").forEach((button) => {
 
 $("clear-filters").addEventListener("click", () => {
   state.filter = { ...EMPTY_FILTER };
+  state.search = "";
   refresh().catch((error) => showMessage(error.message, true));
 });
 
-$("city").addEventListener("change", () => {
-  loadNeighborhoods();
+$("lead-search").addEventListener("input", (event) => {
+  state.search = event.target.value;
+  renderFilters();
+  if (state.view === "leads") renderLeads();
+  if (state.view === "planilha") renderSheet();
 });
 
 $("overlay").addEventListener("click", closeDrawer);
@@ -2404,15 +2729,14 @@ $("search-form").addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         segment: $("segment").value,
-        neighborhood: $("neighborhood").value,
-        city: $("city").value,
+        zone: $("zone").value,
       }),
     });
     await loadOptions();
     state.preview = {
       ...result,
       segment: $("segment").value,
-      neighborhood: $("neighborhood").value.trim(),
+      zone: $("zone").value,
       selected: new Set(result.leads.filter((lead) => lead.recommended).map((lead) => lead.id)),
     };
     renderPreview();
@@ -2438,9 +2762,13 @@ async function init() {
       state.segments[key] = label;
       $("segment").append(h("option", { value: key }, label));
     });
+    const zoneList = await api("/api/zones");
+    zoneList.forEach(({ key, label }) => {
+      state.zones[key] = label;
+      $("zone").append(h("option", { value: key }, label));
+    });
     await loadOptions();
-    await loadNeighborhoods();
-    const first = state.options.segments.length ? "leads" : "buscar";
+    const first = state.options.segments.length ? "hoje" : "buscar";
     state.view = VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : first;
     await refresh();
   } catch (error) {

@@ -72,14 +72,15 @@ UPSERT_SQL = f"""
 INSERT INTO leads (
     id, name, segment, neighborhood, phone, phone_national, phone_kind, address,
     city, uf, email, instagram, facebook, other_links, website, site_state,
-    lat, lon, score, source_seen_at
+    lat, lon, score, zone, source_seen_at
 ) VALUES (
     :id, :name, :segment, :neighborhood, :phone, :phone_national, :phone_kind, :address,
     :city, :uf, :email, :instagram, :facebook, :other_links, :website, :site_state,
-    :lat, :lon, :score, CURRENT_TIMESTAMP
+    :lat, :lon, :score, :zone, CURRENT_TIMESTAMP
 )
 ON CONFLICT (id) DO UPDATE SET
     name = excluded.name,
+    zone = COALESCE(leads.zone, excluded.zone),
     phone = COALESCE(excluded.phone, leads.phone),
     phone_national = COALESCE(excluded.phone_national, leads.phone_national),
     phone_kind = COALESCE(excluded.phone_kind, leads.phone_kind),
@@ -170,7 +171,17 @@ def add_outreach(conn):
     )
 
 
-MIGRATIONS = (add_presence_columns, add_manual_check, allow_prospect_stage, add_outreach)
+def add_zone(conn):
+    conn.execute("ALTER TABLE leads ADD COLUMN zone TEXT")
+
+
+MIGRATIONS = (
+    add_presence_columns,
+    add_manual_check,
+    allow_prospect_stage,
+    add_outreach,
+    add_zone,
+)
 
 
 def schema_version(conn):
@@ -278,7 +289,10 @@ def add_leads(conn, leads):
     for lead in leads:
         if not is_known(conn, lead["id"]) and same_place_elsewhere(conn, lead):
             continue
-        conn.execute(UPSERT_SQL, {**lead, "other_links": json.dumps(lead["other_links"])})
+        conn.execute(
+            UPSERT_SQL,
+            {"zone": None, **lead, "other_links": json.dumps(lead["other_links"])},
+        )
     conn.commit()
     return conn.execute("SELECT COUNT(*) FROM leads").fetchone()[0] - before
 

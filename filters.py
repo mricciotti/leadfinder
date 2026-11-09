@@ -1,5 +1,6 @@
 import contacts
 import db
+import zones
 
 SITE_FILTERS = {
     "com_site": ("site_informado", "site_ok", "site_com_problemas", "site_inacessivel"),
@@ -19,6 +20,8 @@ def matches(lead, wanted):
     evaluation = lead["evaluation"]
     offer_keys = [offer["key"] for offer in evaluation["offers"]]
     if wanted["segment"] and lead["segment"] != wanted["segment"]:
+        return False
+    if wanted.get("zone") and lead.get("zone") != wanted["zone"]:
         return False
     if wanted["neighborhood"] and not same_text(lead["neighborhood"], wanted["neighborhood"]):
         return False
@@ -68,16 +71,21 @@ def options(leads):
     }
 
 
+def place_of(lead):
+    if lead.get("zone"):
+        return (lead["segment"], "zona", lead["zone"])
+    return (lead["segment"], "bairro", contacts.text_key(lead["neighborhood"]))
+
+
 def areas(leads):
     cities_by_place = {}
     for lead in leads:
         if lead["city"]:
-            place = (lead["segment"], contacts.text_key(lead["neighborhood"]))
-            cities_by_place.setdefault(place, set()).add(contacts.text_key(lead["city"]))
+            cities_by_place.setdefault(place_of(lead), set()).add(contacts.text_key(lead["city"]))
 
     found = {}
     for lead in leads:
-        place = (lead["segment"], contacts.text_key(lead["neighborhood"]))
+        place = place_of(lead)
         city = contacts.text_key(lead["city"])
         if not city and len(cities_by_place.get(place, ())) == 1:
             city = next(iter(cities_by_place[place]))
@@ -85,7 +93,8 @@ def areas(leads):
         if key not in found:
             found[key] = {
                 "segment": lead["segment"],
-                "neighborhood": lead["neighborhood"],
+                "neighborhood": zones.label(lead["zone"]) if lead.get("zone") else lead["neighborhood"],
+                "zone": lead.get("zone"),
                 "city": None,
                 "uf": None,
                 "total": 0,

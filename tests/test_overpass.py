@@ -3,6 +3,7 @@ import asyncio
 import pytest
 
 import overpass
+import zones
 
 
 def element(tags, kind="node", element_id=1, **extra):
@@ -224,6 +225,7 @@ def test_parse_places_builds_lead_fields():
         "name": "Cantina Boa",
         "segment": "restaurante",
         "neighborhood": "Pinheiros",
+        "zone": None,
         "phone": "+55 11 3333-4444",
         "phone_national": "1133334444",
         "phone_kind": "fixo",
@@ -435,3 +437,141 @@ def test_segment_labels_are_unique():
     labels = [label for label, _ in overpass.SEGMENTS.values()]
 
     assert len(labels) == len(set(labels))
+
+
+def test_build_zone_query_filters_the_segment_inside_each_district_of_the_zone():
+    query = overpass.build_zone_query("restaurante", ["Moema", "Jardim Ângela"])
+
+    assert query.startswith(f"[out:json][timeout:{overpass.ZONE_TIMEOUT}];")
+    assert '"admin_level"="9"]["name"~"^(Moema|Jardim Ângela)$"]->.districts;' in query
+    assert "foreach.districts->.district(.district out tags;.district map_to_area->.zone;" in query
+    assert 'nwr["amenity"="restaurant"]["name"](area.zone);' in query
+
+
+def test_build_zone_query_uses_every_tag_of_the_segment():
+    query = overpass.build_zone_query("petshop", ["Moema"])
+
+    assert 'nwr["shop"="pet"]["name"](area.zone);' in query
+    assert 'nwr["shop"="pet_grooming"]["name"](area.zone);' in query
+
+
+def test_build_zone_query_rejects_unknown_segment():
+    with pytest.raises(KeyError):
+        overpass.build_zone_query("inexistente", ["Moema"])
+
+
+def district(name):
+    return {
+        "type": "relation",
+        "id": 900000,
+        "tags": {"name": name, "boundary": "administrative", "admin_level": "9"},
+    }
+
+
+def zone_search(elements, zone="sul"):
+    queries = []
+
+    def handler(request):
+        assert "nominatim" not in request.url.host
+        queries.append(request.content.decode())
+        return httpx.Response(200, json={"elements": elements})
+
+    async def no_sleep(seconds):
+        raise AssertionError("não deveria esperar")
+
+    result = asyncio.run(
+        overpass.search(
+            "restaurante", "Zona Sul", "São Paulo",
+            transport=httpx.MockTransport(handler), sleep=no_sleep, zone=zone,
+        )
+    )
+    return queries, result
+
+
+def test_zone_search_makes_one_overpass_call_and_no_geocoding():
+    queries, result = zone_search([district("Moema"), element({"name": "Cantina"})])
+
+    assert len(queries) == 1
+    assert result["total"] == 1
+
+
+def test_zone_search_marks_leads_with_the_zone_city_and_state():
+    _, result = zone_search([district("Moema"), element({"name": "Cantina"})], zone="oeste")
+
+    lead = result["leads"][0]
+    assert lead["zone"] == "oeste"
+    assert lead["city"] == "São Paulo"
+    assert lead["uf"] == "SP"
+
+
+def test_zone_search_does_not_count_the_district_markers_as_places():
+    _, result = zone_search(
+        [district("Moema"), element({"name": "Cantina"}, element_id=1), district("Saúde")]
+    )
+
+    assert result["total"] == 1
+    assert [lead["name"] for lead in result["leads"]] == ["Cantina"]
+
+
+def test_zone_search_gives_each_place_the_district_it_was_found_in():
+    _, result = zone_search(
+        [
+            district("Moema"),
+            element({"name": "Em Moema"}, element_id=1),
+            district("Saúde"),
+            element({"name": "Na Saúde"}, element_id=2),
+            element({"name": "Também na Saúde"}, element_id=3),
+        ]
+    )
+
+    assert {lead["name"]: lead["neighborhood"] for lead in result["leads"]} == {
+        "Em Moema": "Moema",
+        "Na Saúde": "Saúde",
+        "Também na Saúde": "Saúde",
+    }
+
+
+def test_zone_search_prefers_the_neighborhood_written_on_the_map():
+    _, result = zone_search(
+        [district("Pinheiros"), element({"name": "Cantina", "addr:suburb": "Vila Madalena"})]
+    )
+
+    assert result["leads"][0]["neighborhood"] == "Vila Madalena"
+
+
+def test_zone_search_falls_back_to_the_zone_name_for_a_place_before_any_district():
+    _, result = zone_search([element({"name": "Cantina"})])
+
+    assert result["leads"][0]["neighborhood"] == "Zona Sul"
+
+
+def test_zone_search_keeps_a_place_returned_twice_only_once():
+    _, result = zone_search(
+        [
+            district("Moema"),
+            element({"name": "Cantina"}, element_id=1),
+            district("Saúde"),
+            element({"name": "Cantina"}, element_id=1),
+        ]
+    )
+
+    assert len(result["leads"]) == 1
+    assert result["leads"][0]["neighborhood"] == "Moema"
+
+
+def test_zone_search_uses_the_district_names_of_that_zone_in_the_query():
+    queries, _ = zone_search([], zone="centro")
+
+    assert "Bela Vista" in queries[0].replace("+", " ")
+    assert "Grajaú" not in queries[0]
+
+
+def test_a_neighborhood_search_leaves_the_zone_empty_and_ignores_district_markers():
+    lead = overpass.parse_places(
+        {"elements": [element({"name": "Cantina", "addr:suburb": "Vila B"})]},
+        "restaurante",
+        "Pinheiros",
+    )["leads"][0]
+
+    assert lead["zone"] is None
+    assert lead["neighborhood"] == "Pinheiros"

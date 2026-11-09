@@ -746,3 +746,69 @@ def test_create_vitrine_refuses_a_slug_outside_the_pattern_before_touching_the_t
         db.create_vitrine(conn, "node-1", slug)
 
     assert conn.execute("SELECT COUNT(*) FROM vitrines").fetchone()[0] == 0
+
+
+@pytest.fixture
+def v4_db(tmp_path):
+    path = tmp_path / "v4.db"
+    with closing(sqlite3.connect(path)) as old:
+        old.row_factory = sqlite3.Row
+        old.execute(OLD_SCHEMA)
+        db.add_presence_columns(old)
+        db.add_manual_check(old)
+        db.allow_prospect_stage(old)
+        db.add_outreach(old)
+        old.execute(
+            "INSERT INTO leads (id, name, segment, neighborhood, status, notes, favorite)"
+            " VALUES ('node-1', 'Antigo', 'cafe', 'Saúde', 'contatado', 'Ligar sexta', 1)"
+        )
+        old.execute("PRAGMA user_version = 4")
+        old.commit()
+    return path
+
+
+def test_migration_five_adds_an_empty_zone_without_losing_data(v4_db):
+    with closing(db.connect(v4_db)) as conn:
+        saved = db.list_leads(conn)[0]
+
+    assert (saved["id"], saved["status"], saved["notes"], saved["favorite"]) == ("node-1", "contatado", "Ligar sexta", 1)
+    assert saved["zone"] is None
+
+
+def test_migration_five_backs_up_the_database_first(v4_db):
+    db.connect(v4_db).close()
+
+    backups = list(v4_db.parent.glob("v4.db.bak-*"))
+    assert len(backups) == 1
+    with closing(sqlite3.connect(backups[0])) as copy:
+        columns = {row[1] for row in copy.execute("PRAGMA table_info(leads)")}
+    assert "zone" not in columns
+
+
+def test_a_lead_without_a_zone_key_is_saved_with_no_zone(conn):
+    db.add_leads(conn, [lead()])
+
+    assert db.list_leads(conn)[0]["zone"] is None
+
+
+def test_the_zone_of_a_lead_is_saved(conn):
+    db.add_leads(conn, [lead(zone="sul")])
+
+    assert db.list_leads(conn)[0]["zone"] == "sul"
+
+
+def test_reimporting_fills_an_empty_zone_but_never_changes_a_set_one(conn):
+    db.add_leads(conn, [lead("node-1"), lead("node-2", zone="sul")])
+
+    db.add_leads(conn, [lead("node-1", zone="oeste"), lead("node-2", zone="norte")])
+
+    zones_by_id = {item["id"]: item["zone"] for item in db.list_leads(conn)}
+    assert zones_by_id == {"node-1": "oeste", "node-2": "sul"}
+
+
+def test_reimporting_without_a_zone_keeps_the_saved_zone(conn):
+    db.add_leads(conn, [lead(zone="leste")])
+
+    db.add_leads(conn, [lead(zone=None)])
+
+    assert db.list_leads(conn)[0]["zone"] == "leste"

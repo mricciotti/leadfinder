@@ -625,3 +625,104 @@ def test_two_different_places_with_the_same_name_far_apart_are_both_kept(tmp_pat
     body = make_client(tmp_path, far).post("/api/search", json=SEARCH).json()
 
     assert (body["new"], body["duplicates"]) == (2, 0)
+
+
+ZONE_SEARCH = {"segment": "restaurante", "zone": "sul"}
+
+
+async def zone_searcher(segment, neighborhood, city, **extra):
+    return {
+        "total": 2,
+        "leads": [
+            lead("node-1", "Na Zona Sul", 3, neighborhood="Moema", zone="sul"),
+            lead("node-2", "Outro Lugar", 1, neighborhood="Saúde", zone="sul"),
+        ],
+    }
+
+
+def test_zones_lists_the_five_zones_with_their_labels(tmp_path):
+    response = make_client(tmp_path).get("/api/zones")
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"key": "centro", "label": "Centro"},
+        {"key": "norte", "label": "Zona Norte"},
+        {"key": "leste", "label": "Zona Leste"},
+        {"key": "sul", "label": "Zona Sul"},
+        {"key": "oeste", "label": "Zona Oeste"},
+    ]
+
+
+def test_zone_search_gives_the_searcher_the_zone_and_the_label(tmp_path):
+    received = {}
+
+    async def searcher(segment, neighborhood, city, **extra):
+        received.update(segment=segment, neighborhood=neighborhood, city=city, extra=extra)
+        return {"total": 0, "leads": []}
+
+    response = make_client(tmp_path, searcher).post("/api/search", json=ZONE_SEARCH)
+
+    assert response.status_code == 200
+    assert (received["segment"], received["neighborhood"], received["city"]) == ("restaurante", "Zona Sul", "São Paulo")
+    assert received["extra"] == {"zone": "sul"}
+
+
+def test_zone_search_ignores_a_neighborhood_sent_along(tmp_path):
+    received, searcher = capture_searcher()
+
+    make_client(tmp_path, searcher).post(
+        "/api/search", json={**ZONE_SEARCH, "neighborhood": "Pinheiros", "city": "Santos"}
+    )
+
+    assert received["extra"]["zone"] == "sul"
+    assert "place" not in received["extra"]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"segment": "restaurante"},
+        {"segment": "restaurante", "zone": "lua"},
+        {"segment": "restaurante", "neighborhood": "P"},
+    ],
+)
+def test_search_needs_a_valid_zone_or_a_neighborhood(tmp_path, body):
+    assert make_client(tmp_path).post("/api/search", json=body).status_code == 422
+
+
+def test_saving_a_zone_search_keeps_the_zone_and_the_neighborhood_of_each_lead(tmp_path):
+    client = make_client(tmp_path, zone_searcher)
+
+    save_all(client, ZONE_SEARCH)
+
+    saved = {item["name"]: item for item in client.get("/api/leads").json()}
+    assert saved["Na Zona Sul"]["zone"] == "sul"
+    assert saved["Na Zona Sul"]["neighborhood"] == "Moema"
+    assert saved["Outro Lugar"]["neighborhood"] == "Saúde"
+
+
+def test_leads_can_be_filtered_by_zone(tmp_path):
+    client = make_client(tmp_path, zone_searcher)
+    save_all(client, ZONE_SEARCH)
+
+    assert len(client.get("/api/leads", params={"zone": "sul"}).json()) == 2
+    assert client.get("/api/leads", params={"zone": "norte"}).json() == []
+    assert client.get("/api/leads", params={"zone": "lua"}).status_code == 422
+
+
+def test_the_export_follows_the_zone_filter(tmp_path):
+    client = make_client(tmp_path, zone_searcher)
+    save_all(client, ZONE_SEARCH)
+
+    assert client.get("/api/export/leads", params={"zone": "sul"}).status_code == 200
+    assert client.get("/api/export/leads", params={"zone": "norte"}).status_code == 404
+
+
+def test_searched_zones_appear_as_one_area_with_the_zone(tmp_path):
+    client = make_client(tmp_path, zone_searcher)
+    save_all(client, ZONE_SEARCH)
+
+    areas = client.get("/api/areas").json()
+
+    assert len(areas) == 1
+    assert (areas[0]["zone"], areas[0]["neighborhood"], areas[0]["total"]) == ("sul", "Zona Sul", 2)

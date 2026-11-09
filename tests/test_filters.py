@@ -225,3 +225,42 @@ def test_areas_do_not_count_possible_prospects_as_contacted(leads):
         lead["status"] = "prospecto"
 
     assert all(area["contacted"] == 0 for area in filters.areas(leads))
+
+
+def lead_named(leads, name):
+    return next(item for item in leads if item["name"] == name)
+
+
+def test_zone_filter_keeps_only_leads_of_that_zone(leads):
+    lead_named(leads, "Sem Site")["zone"] = "sul"
+    lead_named(leads, "Com Site")["zone"] = "oeste"
+
+    assert names(leads, zone="sul") == ["Sem Site"]
+    assert names(leads, zone="oeste") == ["Com Site"]
+    assert names(leads, zone="norte") == []
+
+
+def test_leads_without_a_zone_do_not_match_a_zone_filter(leads):
+    assert names(leads, zone="sul") == []
+
+
+def test_zone_leads_make_one_area_per_segment_and_zone_whatever_their_neighborhood(leads):
+    for name, bairro in (("Sem Site", "Moema"), ("Com Site", "Saúde"), ("So Insta", "Pinheiros")):
+        lead_named(leads, name)["zone"] = "sul"
+        lead_named(leads, name)["neighborhood"] = bairro
+
+    areas = [area for area in filters.areas(leads) if area["zone"]]
+
+    assert len(areas) == 1
+    assert areas[0]["zone"] == "sul"
+    assert areas[0]["neighborhood"] == "Zona Sul"
+    assert areas[0]["total"] == 3
+
+
+def test_zone_areas_are_kept_apart_from_neighborhood_areas_and_other_zones(leads):
+    lead_named(leads, "Sem Site")["zone"] = "sul"
+    lead_named(leads, "Com Site")["zone"] = "oeste"
+
+    result = filters.areas(leads)
+
+    assert {area["zone"] for area in result} == {"sul", "oeste", None}

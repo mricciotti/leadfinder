@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse, HTMLResponse, Response
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 import contacts
 import db
@@ -20,6 +20,7 @@ import overpass
 import places
 import scoring
 import vitrines
+import zones
 
 INDEX = Path(__file__).parent / "static" / "index.html"
 MAX_PREVIEWS = 10
@@ -28,12 +29,20 @@ RECOMMENDED_SITE_STATES = ("sem_site_na_fonte", "so_rede_social")
 
 class SearchIn(BaseModel):
     segment: str
-    neighborhood: str = Field(min_length=2)
+    zone: Literal[tuple(zones.ZONES)] | None = None
+    neighborhood: str | None = None
     city: str = "São Paulo"
+
+    @model_validator(mode="after")
+    def needs_zone_or_neighborhood(self):
+        if not self.zone and len((self.neighborhood or "").strip()) < 2:
+            raise ValueError("Escolha uma zona ou informe um bairro.")
+        return self
 
 
 class LeadFilter(BaseModel):
     segment: str | None = None
+    zone: Literal[tuple(zones.ZONES)] | None = None
     neighborhood: str | None = None
     city: str | None = None
     uf: str | None = None
@@ -247,6 +256,10 @@ def create_app(
             for key, (label, _) in overpass.SEGMENTS.items()
         ]
 
+    @app.get("/api/zones")
+    def zone_list():
+        return [{"key": key, "label": label} for key, (label, _) in zones.ZONES.items()]
+
     @app.get("/api/leads")
     def list_leads(wanted: Annotated[LeadFilter, Query()]):
         return filtered_leads(wanted)
@@ -286,9 +299,13 @@ def create_app(
     async def search(body: SearchIn):
         if body.segment not in overpass.SEGMENTS:
             raise HTTPException(400, "Segmento desconhecido.")
-        neighborhood, city = body.neighborhood.strip(), body.city.strip()
-        known_place = places.find(neighborhood, city)
-        extra = {"place": known_place} if known_place else {}
+        if body.zone:
+            neighborhood, city = zones.label(body.zone), zones.CITY
+            extra = {"zone": body.zone}
+        else:
+            neighborhood, city = body.neighborhood.strip(), body.city.strip()
+            known_place = places.find(neighborhood, city)
+            extra = {"place": known_place} if known_place else {}
         try:
             result = await searcher(body.segment, neighborhood, city, **extra)
         except overpass.PlaceNotFound:
